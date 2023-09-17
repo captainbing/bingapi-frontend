@@ -8,9 +8,9 @@ import {
   Col,
   message
 } from "antd";
-import {editInterface, getInterfaceById} from "@/services/customapi";
 import JSONPretty from "react-json-pretty";
 import {SizeType} from "@ant-design/pro-form/es/BaseForm";
+import {editInterface, getInterfaceById} from "@/services/api/interface";
 /**
  * 编辑接口
  */

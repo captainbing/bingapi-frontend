@@ -1,7 +1,7 @@
+import { AntDesignOutlined, PlusOutlined } from '@ant-design/icons';
 import ProCard from '@ant-design/pro-card';
 import { useModel } from '@umijs/max';
-import {Avatar, Button, Card, Col, Divider, Image, Input, Row, Space, Tag} from 'antd';
-import {AntDesignOutlined, PlusOutlined} from "@ant-design/icons";
+import { Avatar, Button, Divider, Input, Space, Tag } from 'antd';
 
 const UserCenter = () => {
   const { initialState } = useModel('@@initialState');
@@ -17,12 +17,14 @@ const UserCenter = () => {
           />
           <h2> {initialState?.currentUser?.username}</h2>
           <h3> {initialState?.currentUser?.userProfile}</h3>
-          <Divider/>
+          <Divider />
           <Space align={'start'} direction={'vertical'}>
             标签
             <Tag>哈哈</Tag>
           </Space>
-          <Button size={'small'}><PlusOutlined/></Button>
+          <Button size={'small'}>
+            <PlusOutlined />
+          </Button>
           <Input size={'small'} style={{ width: '20%' }}></Input>
         </ProCard>
         <ProCard title="左右分栏子卡片带标题" headerBordered>

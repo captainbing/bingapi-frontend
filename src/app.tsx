@@ -8,7 +8,8 @@ import { Button } from "antd";
 import defaultSettings from '../config/defaultSettings';
 import { AvatarDropdown,AvatarName } from './components/RightContent/AvatarDropdown';
 import { errorConfig } from './requestErrorConfig';
-import {getUserById} from "@/services/customapi";
+import {getUserById} from "@/services/api/user";
+
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
@@ -101,7 +102,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
       ? [
           <Link key="openapi" to="/umi/plugin/openapi" target="_blank">
             <LinkOutlined />
-            <span>OpenAPI 文档</span>
+            <span>作者 Gitee</span>
           </Link>,
         ]
       : [],

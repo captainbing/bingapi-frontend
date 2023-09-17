@@ -1,10 +1,10 @@
-import { listCurrentUserInterfaceInfo, searchInterfacesByName } from '@/services/customapi';
 import type { ActionType } from '@ant-design/pro-components';
 import { PageContainer, ProList } from '@ant-design/pro-components';
 import { history, useModel } from '@umijs/max';
 import { Badge, Button, message } from 'antd';
 import React, { useEffect, useRef, useState } from 'react';
 import JSONPretty from 'react-json-pretty';
+import {listCurrentUserInterfaceInfo, searchInterfacesByName} from "@/services/api/interface";
 
 const renderBadge = (count: number, active = false) => {
   return (

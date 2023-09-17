@@ -1,6 +1,4 @@
 import Footer from '@/components/Footer';
-import { login } from '@/services/ant-design-pro/api';
-import { getFakeCaptcha } from '@/services/ant-design-pro/login';
 import {
   AlipayCircleOutlined,
   LockOutlined,
@@ -22,6 +20,7 @@ import { Alert, message, Tabs } from 'antd';
 import Settings from '../../../../config/defaultSettings';
 import React, {useRef, useState} from 'react';
 import { flushSync } from 'react-dom';
+import {getFakeCaptcha, login} from "@/services/api/login";
 
 const ActionIcons = () => {
   const langClassName = useEmotionCss(({ token }) => {

@@ -1,4 +1,3 @@
-import { searchPicture } from '@/services/customapi';
 import { AppleOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { Button, Card, Col, Image, Input, List, message, Row, Space, Tabs } from 'antd';
@@ -6,6 +5,7 @@ import Meta from 'antd/es/card/Meta';
 import React, { useState } from 'react';
 import {useLocation, useMatch, useParams} from 'react-router';
 import { useSearchParams } from 'react-router-dom';
+import {searchPicture} from "@/services/api/search";
 
 interface Picture {
   title?: string;

@@ -1,7 +1,7 @@
-import { editUserInfo, getUserById, updateUserPassword } from '@/services/customapi';
 import { useModel } from '@umijs/max';
 import { Button, Form, Input, message, Tabs } from 'antd';
 import { useEffect, useState } from 'react';
+import {editUserInfo, getUserById, updateUserPassword} from "@/services/api/user";
 
 type LayoutType = Parameters<typeof Form>[0]['layout'];
 

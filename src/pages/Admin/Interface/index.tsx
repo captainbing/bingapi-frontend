@@ -1,10 +1,11 @@
-import UpdateInterface from "@/pages/Admin/components/UpdateInterface";
-import { deleteInterfaceBatch,deleteInterfaceById,listInterfaceInfo } from '@/services/customapi';
+import UpdateInterface from "@/pages/Admin/Interface/components/UpdateInterface";
 import { PageContainer } from '@ant-design/pro-components';
-import {Button, Col, Divider, Input, message, Popconfirm, Row, Select, Space, Table, Tag} from 'antd';
+import {Button, Col, Divider, Input, message, Popconfirm, Row, Select, Space, Switch, Table, Tag} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { TableRowSelection } from 'antd/es/table/interface';
 import React,{ useEffect,useState } from 'react';
+import updateInterface from "@/pages/Admin/Interface/components/UpdateInterface";
+import {deleteInterfaceBatch, deleteInterfaceById, editInterface, listInterfaceInfo} from "@/services/api/interface";
 
 
 const InterfaceManager: React.FC = () => {
@@ -19,16 +20,19 @@ const InterfaceManager: React.FC = () => {
       title: '名称',
       dataIndex: 'name',
       key: 'name',
+      ellipsis:true
     },
     {
       title: '描述',
       dataIndex: 'description',
       key: 'description',
+      ellipsis:true
     },
     {
       title: 'URL',
       dataIndex: 'url',
       key: 'url',
+      ellipsis:true
     },
     {
       title: '请求头',
@@ -54,22 +58,28 @@ const InterfaceManager: React.FC = () => {
       title: '创建时间',
       dataIndex: 'createTime',
       key: 'createTime',
+      ellipsis:true
     },
     {
       title: '是否删除',
       dataIndex: 'deleted',
       key: 'deleted',
+      render:(deleted)=>(
+        deleted === 0
+          ? <Tag color="magenta">{deleted === 0 && '未删除'}</Tag>
+          : <Tag color="red">{deleted === 1 && '已删除'}</Tag>
+      )
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      render: (tag: number) => (
-        <span>
-        <Tag color={tag === 0 ? 'geekblue' : 'green'} key={tag}>
-          {tag === 0 ? '可用' : '关闭'}
-        </Tag>
-      </span>
+      width:'8%',
+      render: (status: number,record) => (
+        <Switch
+          checked={status === 0} checkedChildren="可用" unCheckedChildren="关闭"
+          onClick={(checked, event)=>changeInterfaceStatus(checked,record)}
+        />
       ),
     },
     {
@@ -91,10 +101,28 @@ const InterfaceManager: React.FC = () => {
       ),
     },
   ];
+
+  const changeInterfaceStatus = async (checked:boolean,record:object) => {
+    const data = {
+      ...record,
+      status:checked ? 0 : 1
+    }
+    const res = await editInterface(data)
+    if (res?.code === 200){
+      await getInterfaceList({
+        name:interfaceName,
+        status:interfaceStatus,
+        method:interfaceMethod,
+        current:paginationOption.current,
+        size:paginationOption.size
+      })
+    }
+  }
+
   const [interfaceList, setInterfaceList] = useState<CUSTOM_API.InterfaceInfo[]>([]);
   useEffect(() => {
     // 初始化接口数据
-    getInterfaceList({})
+    getInterfaceList({}).then()
   }, []);
   /**
    * 根据ID删除接口（逻辑）
@@ -114,7 +142,6 @@ const InterfaceManager: React.FC = () => {
    * 批量删除接口
    */
   const removeInterfaceBatch = async () => {
-    console.log(selectedRowKeys)
     const res = await deleteInterfaceBatch({
       ids:selectedRowKeys
     })
@@ -148,11 +175,17 @@ const InterfaceManager: React.FC = () => {
   /**
    * 获取接口集合
    */
-  const getInterfaceList = async (params:object) => {
-    const res = await listInterfaceInfo(params)
+  const getInterfaceList = async (data:object) => {
+    const res = await listInterfaceInfo(data)
     if (res?.code === 200){
       setInterfaceList(res?.data?.records)
-      setTotal(res?.data?.total)
+      setPaginationOption({
+        ...paginationOption,
+        current: res?.data?.current,
+        size: res?.data?.size,
+        page: res?.data?.page,
+        total: res?.data?.total
+      })
     }
   }
 
@@ -183,7 +216,6 @@ const InterfaceManager: React.FC = () => {
   /**
    * 表格分页
    */
-  const [total,setTotal] = useState(0)
   const onPageChange = async (current:number,size:number) => {
     await getInterfaceList({
       name:interfaceName,
@@ -193,6 +225,13 @@ const InterfaceManager: React.FC = () => {
       size
     })
   }
+  const [paginationOption,setPaginationOption] = useState<any>({
+    onChange: onPageChange,
+    current:1,
+    size:10,
+    page:1,
+    total:10,
+  })
   const [editModalVisible,setEditModalVisible] = useState(false)
   const [interfaceId,setInterfaceId] = useState<any>()
   const showEditModal = (record:CUSTOM_API.InterfaceInfo) => {
@@ -202,6 +241,33 @@ const InterfaceManager: React.FC = () => {
   const handleEditCancel = () => {
     setEditModalVisible(false)
   }
+
+  const requestMethodOptions = [
+    {
+      value: 'GET',
+      label: 'GET',
+    },
+    {
+      value: 'POST',
+      label: 'POST',
+    },
+    {
+      value: 'PUT',
+      label: 'PUT',
+    },
+    {
+      value: 'DELETE',
+      label: 'DELETE',
+    },
+    {
+      value: 'OPTIONS',
+      label: 'OPTIONS',
+    },
+    {
+      value: 'PATCH',
+      label: 'PATCH',
+    },
+  ]
   return (
     <PageContainer
       header={{
@@ -218,7 +284,7 @@ const InterfaceManager: React.FC = () => {
                 okText="确定"
                 cancelText="取消"
               >
-                <Button type="dashed">批量删除</Button>
+                <Button type="primary" danger>批量删除</Button>
               </Popconfirm>,
             ]
           : []
@@ -260,16 +326,13 @@ const InterfaceManager: React.FC = () => {
               style={{ width: 120 }}
               allowClear
               onChange={(value) => setInterfaceMethod(value)}
-              options={[
-                { value: 'GET', label: 'GET' },
-                { value: 'POST', label: 'POST' },
-              ]}
+              options={requestMethodOptions}
             />
           </Space>
         </Col>
         <Col span={4}>
           <Row>
-            <Col offset={12}>
+            <Col offset={8}>
               <Button type={'primary'} onClick={searchInterfaceList}>
                 搜索
               </Button>
@@ -282,15 +345,12 @@ const InterfaceManager: React.FC = () => {
       </Row>
       <Divider/>
       <Table
-        title={()=><Button type={"dashed"}>管理员</Button>}
+        // title={()=><Button type={"dashed"}>管理员</Button>}
         rowSelection={rowSelection}
         dataSource={interfaceList}
         columns={columns}
         rowKey={(record) => record.id as number}
-        pagination={{
-          onChange: onPageChange,
-          total,
-        }}
+        pagination={paginationOption}
       />
       <UpdateInterface
         editModalVisible={editModalVisible}

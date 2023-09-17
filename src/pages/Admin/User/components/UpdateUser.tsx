@@ -4,14 +4,13 @@ import {
   Input,
   Modal,
   Select,
-  Radio,
   Row,
   Col,
   message
 } from "antd";
-import {editInterface, editUserInfo, getInterfaceById, getUserById} from "@/services/customapi";
 import JSONPretty from "react-json-pretty";
 import {SizeType} from "@ant-design/pro-form/es/BaseForm";
+import {editUserInfo, getUserById} from "@/services/api/user";
 /**
  * 编辑接口
  */

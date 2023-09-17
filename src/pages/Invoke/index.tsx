@@ -1,4 +1,3 @@
-import { getInterfaceById, invokeInterface } from '@/services/customapi';
 import { AndroidOutlined, AppleOutlined } from '@ant-design/icons';
 
 import { PageContainer } from '@ant-design/pro-components';
@@ -26,9 +25,10 @@ import JSONPretty from 'react-json-pretty';
 import { useLocation, useParams } from 'react-router';
 import { useSearchParams } from 'react-router-dom';
 import {DirectoryTreeProps} from "antd/es/tree";
-import {SizeType} from "@ant-design/pro-form/es/BaseForm";
 import DrawerInterface from "@/pages/Invoke/components/DrawerInterface";
 import TabInterface from "@/pages/Invoke/components/TabInterface";
+import {getInterfaceById} from "@/services/api/interface";
+import {invokeInterface} from "@/services/api/invoke";
 
 const { DirectoryTree } = Tree;
 
@@ -390,7 +390,32 @@ const Index: React.FC = () => {
     console.log('Trigger Expand', keys, info);
   };
 
-
+  const requestMethodOptions = [
+    {
+      value: 'GET',
+      label: 'GET',
+    },
+    {
+      value: 'POST',
+      label: 'POST',
+    },
+    {
+      value: 'PUT',
+      label: 'PUT',
+    },
+    {
+      value: 'DELETE',
+      label: 'DELETE',
+    },
+    {
+      value: 'OPTIONS',
+      label: 'OPTIONS',
+    },
+    {
+      value: 'PATCH',
+      label: 'PATCH',
+    },
+  ]
 
   return (
     <PageContainer
@@ -399,7 +424,6 @@ const Index: React.FC = () => {
         breadcrumb: {},
       }}
     >
-      <TabInterface/>
       <Row>
         <Col span={4}>
           <DirectoryTree
@@ -414,38 +438,14 @@ const Index: React.FC = () => {
         <Col span={18} offset={1}>
           <Row gutter={0}>
             <Col className="gutter-row" span={24}>
+              <TabInterface/>
               <Space.Compact block={true}>
                 <Select
                   size="large"
                   value={requestMethod}
                   style={{ width: '15%' }}
                   onSelect={changeRequestMethod}
-                  options={[
-                    {
-                      value: 'GET',
-                      label: 'GET',
-                    },
-                    {
-                      value: 'POST',
-                      label: 'POST',
-                    },
-                    {
-                      value: 'PUT',
-                      label: 'PUT',
-                    },
-                    {
-                      value: 'DELETE',
-                      label: 'DELETE',
-                    },
-                    {
-                      value: 'OPTIONS',
-                      label: 'OPTIONS',
-                    },
-                    {
-                      value: 'PATCH',
-                      label: 'PATCH',
-                    },
-                  ]}
+                  options={requestMethodOptions}
                 ></Select>
                 <AutoComplete
                   autoFocus={true}

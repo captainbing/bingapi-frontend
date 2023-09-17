@@ -1,11 +1,11 @@
 import UpdateUser from "@/pages/Admin/User/components/UpdateUser";
-import {deleteInterfaceBatch, deleteUserBatch, editUserInfo, listUser} from "@/services/customapi";
 import { PageContainer } from '@ant-design/pro-components';
 import type { InputRef } from 'antd';
-import {Button, Col, Divider, Form, Input, message, Popconfirm, Row, Select, Space, Table} from 'antd';
+import {Button, Col, Divider, Form, Input, message, Popconfirm, Row, Select, Space, Switch, Table} from 'antd';
 import type { FormInstance } from 'antd/es/form';
 import { TableRowSelection } from "antd/es/table/interface";
 import React,{ useContext,useEffect,useRef,useState } from 'react';
+import {deleteUserBatch, editUserInfo, listUser} from "@/services/api/user";
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
@@ -113,11 +113,17 @@ const UserManager = ()=>{
 
   const [userDataSource, setUserDataSource] = useState([])
 
-  const getUserList = async (params:object) => {
-    const res = await listUser(params)
+  const getUserList = async (data:object) => {
+    const res = await listUser(data)
     if (res?.code === 200){
       setUserDataSource(res?.data?.records)
-      setTotal(res?.data?.total)
+      setPaginationOption({
+        ...paginationOption,
+        current: res?.data?.current,
+        size: res?.data?.size,
+        page: res?.data?.page,
+        total: res?.data?.total
+      })
     }
   }
   useEffect(()=>{
@@ -153,22 +159,6 @@ const UserManager = ()=>{
     setEditModalVisible(false)
     await getUserList({})
   }
-  /**
-   * 根据id修改用户状态
-   * @param record
-   */
-  const changeUserStatusById = async (userStatus:number,record:any) => {
-    const res = await editUserInfo({
-      ...record,
-      userStatus
-    })
-    if (res?.code === 200){
-      message.success("修改成功")
-      await getUserList({})
-      return
-    }
-    message.error("修改失败")
-  }
 
   const userColumns: (ColumnTypes[number] & { editable?: boolean; dataIndex: string })[] = [
     {
@@ -201,17 +191,19 @@ const UserManager = ()=>{
       title: '头像',
       dataIndex: 'userAvatar',
       width: '20%',
+      ellipsis:{
+        showTitle:true
+      }
     },
     {
       title: '状态',
-      dataIndex: 'deleted',
-      width:"6%",
+      dataIndex: 'userStatus',
+      width:"8%",
       render(_,record){
         return (
-          <Select value={record?.userStatus} onChange={(userStatus)=>changeUserStatusById(userStatus,record)}>
-            <Select.Option value={0}>正常</Select.Option>
-            <Select.Option value={1}>BAN</Select.Option>
-          </Select>
+        <Switch checked={record?.userStatus === 1} checkedChildren="BAN" unCheckedChildren="正常"
+                onClick={(checked, event)=>changeUserStatus(checked,record)}
+        />
         )
       }
     },
@@ -321,11 +313,30 @@ const UserManager = ()=>{
     await getUserList({})
   }
 
+  /**
+   * 根据id修改用户状态
+   * @param record
+   */
+  const changeUserStatus = async (checked:boolean,record:object) => {
+    const data = {
+      ...record,
+      userStatus:checked ? 1 : 0
+    }
+    const res = await editUserInfo(data)
+    if (res?.code === 200){
+      await getUserList({
+        userName,
+        userStatus,
+        userRole,
+        current:paginationOption.current,
+        size:paginationOption.size
+      })
+    }
+  }
 
   /**
    * 表格分页
    */
-  const [total,setTotal] = useState(0)
   const onPageChange = async (current:number,size:number) => {
     await getUserList({
       userName,
@@ -335,6 +346,13 @@ const UserManager = ()=>{
       size
     })
   }
+  const [paginationOption,setPaginationOption] = useState<any>({
+    onChange: onPageChange,
+    current:1,
+    size:10,
+    page:1,
+    total:10,
+  })
 
   return (
     <PageContainer
@@ -404,7 +422,7 @@ const UserManager = ()=>{
           </Col>
           <Col span={4}>
             <Row>
-              <Col offset={12}>
+              <Col offset={8}>
                 <Button type={'primary'} onClick={searchInterfaceList}>
                   搜索
                 </Button>
@@ -427,10 +445,7 @@ const UserManager = ()=>{
           rowKey={(record) => record.id as number}
           size={"middle"}
           rowSelection={rowSelection}
-          pagination={{
-            onChange: onPageChange,
-            total,
-          }}
+          pagination={paginationOption}
         />
       <UpdateUser
         editModalVisible={editModalVisible}
