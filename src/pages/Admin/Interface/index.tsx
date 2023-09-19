@@ -268,6 +268,16 @@ const InterfaceManager: React.FC = () => {
       label: 'PATCH',
     },
   ]
+
+  const onChangeInterfaceMethod = async (value: string)=> {
+    setInterfaceMethod(value)
+    await getInterfaceList({
+      name:interfaceName,
+      status:interfaceStatus,
+      method:value,
+    })
+  }
+
   return (
     <PageContainer
       header={{
@@ -325,7 +335,7 @@ const InterfaceManager: React.FC = () => {
               value={interfaceMethod}
               style={{ width: 120 }}
               allowClear
-              onChange={(value) => setInterfaceMethod(value)}
+              onChange={(value) => onChangeInterfaceMethod(value)}
               options={requestMethodOptions}
             />
           </Space>
