@@ -1,78 +1,31 @@
-import UpdateInterface from '@/pages/Admin/Interface/components/UpdateInterface';
-import {
-  deleteInterfaceBatch,
-  deleteInterfaceById,
-  editInterface,
-  listInterfaceInfo,
-} from '@/services/api/interface';
+import DictDataList from '@/pages/System/Dict/components/DictDataList';
+import SearchDictType from '@/pages/System/Dict/components/SearchDictType';
+import { deleteDictTypeById, listDictType } from '@/services/api/dicttype';
+import { deleteInterfaceBatch, editInterface } from '@/services/api/interface';
 import { PageContainer } from '@ant-design/pro-components';
-import { Button, Divider, message, Popconfirm, Space, Switch, Table, Tag } from 'antd';
+import { Button, Divider, message, Popconfirm, Space, Switch, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { TableRowSelection } from 'antd/es/table/interface';
 import React, { useEffect, useState } from 'react';
-import SearchInterface from "@/pages/Admin/Interface/components/SearchInterface";
 
-const InterfaceManager: React.FC = () => {
-  const columns: ColumnsType<CUSTOM_API.InterfaceInfo> = [
+const DictType: React.FC = () => {
+  const columns: ColumnsType<API.DictType> = [
     {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
     },
     {
-      title: '名称',
-      dataIndex: 'name',
-      key: 'name',
+      title: '字典名称',
+      dataIndex: 'dictName',
+      key: 'dictName',
       ellipsis: true,
     },
     {
-      title: '描述',
-      dataIndex: 'description',
-      key: 'description',
+      title: '字典类型',
+      dataIndex: 'dictType',
+      key: 'dictType',
       ellipsis: true,
-    },
-    {
-      title: 'URL',
-      dataIndex: 'url',
-      key: 'url',
-      ellipsis: true,
-    },
-    {
-      title: '请求头',
-      dataIndex: 'requestHeader',
-      key: 'requestHeader',
-    },
-    {
-      title: '响应头',
-      dataIndex: 'responseHeader',
-      key: 'responseHeader',
-    },
-    {
-      title: 'METHOD',
-      dataIndex: 'method',
-      key: 'method',
-    },
-    {
-      title: '创建人',
-      dataIndex: 'userId',
-      key: 'userId',
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'createTime',
-      key: 'createTime',
-      ellipsis: true,
-    },
-    {
-      title: '是否删除',
-      dataIndex: 'deleted',
-      key: 'deleted',
-      render: (deleted) =>
-        deleted === 0 ? (
-          <Tag color="magenta">{deleted === 0 && '未删除'}</Tag>
-        ) : (
-          <Tag color="red">{deleted === 1 && '已删除'}</Tag>
-        ),
     },
     {
       title: '状态',
@@ -89,6 +42,29 @@ const InterfaceManager: React.FC = () => {
       ),
     },
     {
+      title: '创建者',
+      dataIndex: 'createBy',
+      key: 'createBy',
+      ellipsis: true,
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'createTime',
+      key: 'createTime',
+      ellipsis: true,
+    },
+    {
+      title: '更新人',
+      dataIndex: 'updateBy',
+      key: 'updateBy',
+    },
+    {
+      title: '更新时间',
+      dataIndex: 'updateTime',
+      key: 'updateTime',
+      ellipsis: true,
+    },
+    {
       title: '操作',
       key: 'action',
       width: '20%',
@@ -98,9 +74,9 @@ const InterfaceManager: React.FC = () => {
             编辑
           </Button>
           <Popconfirm
-            title={`${record.name}`}
+            title={`${record.dictName}`}
             description={`你确定要删除吗?`}
-            onConfirm={() => removeInterfaceById(record)}
+            onConfirm={() => removeDictTypeById(record)}
             okText="确定"
             cancelText="取消"
           >
@@ -118,28 +94,30 @@ const InterfaceManager: React.FC = () => {
     };
     const res = await editInterface(data);
     if (res?.code === 200) {
-      await getInterfaceList({
+      await getDictTypeList({
+        name: interfaceName,
+        status: interfaceStatus,
+        method: interfaceMethod,
         current: paginationOption.current,
         size: paginationOption.size,
       });
     }
   };
 
-  const [interfaceList, setInterfaceList] = useState<CUSTOM_API.InterfaceInfo[]>([]);
   useEffect(() => {
     // 初始化接口数据
-    getInterfaceList({}).then();
+    getDictTypeList({}).then();
   }, []);
   /**
    * 根据ID删除接口（逻辑）
    */
-  const removeInterfaceById = async (record: CUSTOM_API.InterfaceInfo) => {
-    const res = await deleteInterfaceById({
-      ids: [record?.id],
+  const removeDictTypeById = async (record: API.DictType) => {
+    const res = await deleteDictTypeById({
+      id: record?.id,
     });
     if (res?.code === 200) {
       message.success(res?.message);
-      await getInterfaceList({});
+      await getDictTypeList({});
       return;
     }
     message.error(res?.message);
@@ -153,7 +131,7 @@ const InterfaceManager: React.FC = () => {
     });
     if (res?.code === 200) {
       message.success('删除成功');
-      await getInterfaceList({});
+      await getDictTypeList({});
       return;
     }
     message.error(res?.message);
@@ -179,32 +157,66 @@ const InterfaceManager: React.FC = () => {
   };
 
   /**
-   * 获取接口集合
+   * 获取字典集合
    */
-  const getInterfaceList = async (data: object) => {
-    const res = await listInterfaceInfo(data);
+  const [dictTypeList, setDictTypeList] = useState([]);
+  const getDictTypeList = async (params: any) => {
+    const res = await listDictType(params);
     if (res?.code === 200) {
-      setInterfaceList(res?.data?.records);
+      setDictTypeList(res?.data?.records);
       setPaginationOption({
         ...paginationOption,
         current: res?.data?.current,
         size: res?.data?.size,
-        page: res?.data?.page,
         total: res?.data?.total,
       });
     }
   };
+
+  /**
+   * 搜索接口相关参数
+   */
+  const [interfaceName, setInterfaceName] = useState('');
+  const [interfaceStatus, setInterfaceStatus] = useState('');
+  const [interfaceMethod, setInterfaceMethod] = useState('');
+
+  const searchInterfaceList = async () => {
+    await getDictTypeList({
+      name: interfaceName,
+      status: interfaceStatus,
+      method: interfaceMethod,
+    });
+  };
+
+  /**
+   * 添加
+   */
+  const [editFlag, setEditFlag] = useState(false);
+  const addDictType = () => {
+    setEditFlag(false);
+    setEditModalVisible(true);
+  };
+  const addCancel = () => {
+    getDictTypeList({}).then();
+  };
+
   /**
    * 重置
    */
-  const resetInterfaceList = async () => {
-    await getInterfaceList({});
+  const resetDictType = async () => {
+    setInterfaceName('');
+    setInterfaceStatus('');
+    setInterfaceMethod('');
+    await getDictTypeList({});
   };
   /**
    * 表格分页
    */
   const onPageChange = async (current: number, size: number) => {
-    await getInterfaceList({
+    await getDictTypeList({
+      name: interfaceName,
+      status: interfaceStatus,
+      method: interfaceMethod,
       current,
       size,
     });
@@ -216,18 +228,17 @@ const InterfaceManager: React.FC = () => {
     page: 1,
     total: 10,
   });
+
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [interfaceId, setInterfaceId] = useState<any>();
-  const showEditModal = (record: CUSTOM_API.InterfaceInfo) => {
-    setInterfaceId(record?.id);
+  const [dictType, setDictType] = useState<any>();
+  const showEditModal = (record: API.DictType) => {
+    setDictType(record?.dictType);
     setEditModalVisible(true);
   };
   const handleEditCancel = () => {
     setEditModalVisible(false);
   };
 
-  // @ts-ignore
-  // @ts-ignore
   return (
     <PageContainer
       header={{
@@ -252,27 +263,29 @@ const InterfaceManager: React.FC = () => {
           : []
       }
     >
-      <SearchInterface
-        // @ts-ignore
-        getSearchInterfaceList={getInterfaceList}
-        resetInterfaceList={resetInterfaceList}
+      <SearchDictType
+        onSearchDictType={getDictTypeList}
+        onResetDictType={resetDictType}
+        onAddDictType={addDictType}
+        addCancel={addCancel}
       />
       <Divider />
       <Table
         // title={()=><Button type={"dashed"}>管理员</Button>}
         rowSelection={rowSelection}
-        dataSource={interfaceList}
+        dataSource={dictTypeList}
         columns={columns}
         rowKey={(record) => record.id as number}
         pagination={paginationOption}
       />
-      <UpdateInterface
+      <DictDataList
+        editFlag={editFlag}
         editModalVisible={editModalVisible}
-        id={interfaceId}
+        dictType={dictType}
         handleEditCancel={handleEditCancel}
       />
     </PageContainer>
   );
 };
 
-export default InterfaceManager;
+export default DictType;

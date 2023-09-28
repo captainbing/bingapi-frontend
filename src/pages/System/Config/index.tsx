@@ -1,61 +1,58 @@
-import UpdateInterface from '@/pages/Admin/Interface/components/UpdateInterface';
-import {
-  deleteInterfaceBatch,
-  deleteInterfaceById,
-  editInterface,
-  listInterfaceInfo,
-} from '@/services/api/interface';
+import SearchConfig from '@/pages/System/Config/components/SearchConfig';
+import UpdateConfig from '@/pages/System/Config/components/UpdateConfig';
+import { deleteDictTypeById } from '@/services/api/dicttype';
+import { deleteInterfaceBatch, editInterface } from '@/services/api/interface';
+import { listConfig } from '@/services/api/sysconfig';
 import { PageContainer } from '@ant-design/pro-components';
-import { Button, Divider, message, Popconfirm, Space, Switch, Table, Tag } from 'antd';
+import { Button, Divider, message, Popconfirm, Space, Switch, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { TableRowSelection } from 'antd/es/table/interface';
 import React, { useEffect, useState } from 'react';
-import SearchInterface from "@/pages/Admin/Interface/components/SearchInterface";
 
-const InterfaceManager: React.FC = () => {
-  const columns: ColumnsType<CUSTOM_API.InterfaceInfo> = [
+const Config: React.FC = () => {
+  const columns: ColumnsType<any> = [
     {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
     },
     {
-      title: '名称',
-      dataIndex: 'name',
-      key: 'name',
+      title: '参数键名',
+      dataIndex: 'configKey',
+      key: 'configKey',
       ellipsis: true,
     },
     {
-      title: '描述',
-      dataIndex: 'description',
-      key: 'description',
+      title: '参数键值',
+      dataIndex: 'configValue',
+      key: 'configValue',
       ellipsis: true,
     },
     {
-      title: 'URL',
-      dataIndex: 'url',
-      key: 'url',
+      title: '系统内置',
+      dataIndex: 'configType',
+      key: 'configType',
+      width: '8%',
+      render: (status: string, record) => (
+        <Switch
+          checked={status === 'Y'}
+          checkedChildren="是"
+          unCheckedChildren="否"
+          onClick={(checked, event) => changeInterfaceStatus(checked, record)}
+        />
+      ),
+    },
+    {
+      title: '备注',
+      dataIndex: 'remark',
+      key: 'remark',
       ellipsis: true,
     },
     {
-      title: '请求头',
-      dataIndex: 'requestHeader',
-      key: 'requestHeader',
-    },
-    {
-      title: '响应头',
-      dataIndex: 'responseHeader',
-      key: 'responseHeader',
-    },
-    {
-      title: 'METHOD',
-      dataIndex: 'method',
-      key: 'method',
-    },
-    {
-      title: '创建人',
-      dataIndex: 'userId',
-      key: 'userId',
+      title: '创建者',
+      dataIndex: 'createBy',
+      key: 'createBy',
+      ellipsis: true,
     },
     {
       title: '创建时间',
@@ -64,29 +61,15 @@ const InterfaceManager: React.FC = () => {
       ellipsis: true,
     },
     {
-      title: '是否删除',
-      dataIndex: 'deleted',
-      key: 'deleted',
-      render: (deleted) =>
-        deleted === 0 ? (
-          <Tag color="magenta">{deleted === 0 && '未删除'}</Tag>
-        ) : (
-          <Tag color="red">{deleted === 1 && '已删除'}</Tag>
-        ),
+      title: '更新人',
+      dataIndex: 'updateBy',
+      key: 'updateBy',
     },
     {
-      title: '状态',
-      dataIndex: 'status',
-      key: 'status',
-      width: '8%',
-      render: (status: number, record) => (
-        <Switch
-          checked={status === 0}
-          checkedChildren="可用"
-          unCheckedChildren="关闭"
-          onClick={(checked, event) => changeInterfaceStatus(checked, record)}
-        />
-      ),
+      title: '更新时间',
+      dataIndex: 'updateTime',
+      key: 'updateTime',
+      ellipsis: true,
     },
     {
       title: '操作',
@@ -94,13 +77,13 @@ const InterfaceManager: React.FC = () => {
       width: '20%',
       render: (_, record) => (
         <Space>
-          <Button type={'dashed'} onClick={() => showEditModal(record)}>
+          <Button type={'dashed'} onClick={() => showEditModal(record, true)}>
             编辑
           </Button>
           <Popconfirm
-            title={`${record.name}`}
+            title={`${record.configKey}`}
             description={`你确定要删除吗?`}
-            onConfirm={() => removeInterfaceById(record)}
+            onConfirm={() => removeDictTypeById(record)}
             okText="确定"
             cancelText="取消"
           >
@@ -118,31 +101,38 @@ const InterfaceManager: React.FC = () => {
     };
     const res = await editInterface(data);
     if (res?.code === 200) {
-      await getInterfaceList({
+      await getConfigList({
         current: paginationOption.current,
         size: paginationOption.size,
       });
     }
   };
 
-  const [interfaceList, setInterfaceList] = useState<CUSTOM_API.InterfaceInfo[]>([]);
   useEffect(() => {
     // 初始化接口数据
-    getInterfaceList({}).then();
+    getConfigList({}).then();
   }, []);
   /**
    * 根据ID删除接口（逻辑）
    */
-  const removeInterfaceById = async (record: CUSTOM_API.InterfaceInfo) => {
-    const res = await deleteInterfaceById({
-      ids: [record?.id],
+  const removeDictTypeById = async (record: any) => {
+    const res = await deleteDictTypeById({
+      id: record?.id,
     });
     if (res?.code === 200) {
       message.success(res?.message);
-      await getInterfaceList({});
+      await getConfigList({});
       return;
     }
     message.error(res?.message);
+  };
+  /**
+   * 添加配置
+   */
+  const handleAddConfig = () => {
+    setEditFlag(false);
+    setEditModalVisible(true);
+    setId('');
   };
   /**
    * 批量删除接口
@@ -153,7 +143,7 @@ const InterfaceManager: React.FC = () => {
     });
     if (res?.code === 200) {
       message.success('删除成功');
-      await getInterfaceList({});
+      await getConfigList({});
       return;
     }
     message.error(res?.message);
@@ -181,30 +171,25 @@ const InterfaceManager: React.FC = () => {
   /**
    * 获取接口集合
    */
-  const getInterfaceList = async (data: object) => {
-    const res = await listInterfaceInfo(data);
+  const [configList, setConfigList] = useState<any>([]);
+  const getConfigList = async (params: any) => {
+    const res = await listConfig(params);
     if (res?.code === 200) {
-      setInterfaceList(res?.data?.records);
+      setConfigList(res?.data?.records);
       setPaginationOption({
         ...paginationOption,
         current: res?.data?.current,
         size: res?.data?.size,
-        page: res?.data?.page,
         total: res?.data?.total,
       });
     }
   };
-  /**
-   * 重置
-   */
-  const resetInterfaceList = async () => {
-    await getInterfaceList({});
-  };
+
   /**
    * 表格分页
    */
   const onPageChange = async (current: number, size: number) => {
-    await getInterfaceList({
+    await getConfigList({
       current,
       size,
     });
@@ -217,17 +202,19 @@ const InterfaceManager: React.FC = () => {
     total: 10,
   });
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [interfaceId, setInterfaceId] = useState<any>();
-  const showEditModal = (record: CUSTOM_API.InterfaceInfo) => {
-    setInterfaceId(record?.id);
+  const [id, setId] = useState<any>('');
+  const [editFlag, setEditFlag] = useState(false);
+  const showEditModal = (record: any, isEdit: boolean) => {
+    setEditFlag(isEdit);
+    setId(record?.id);
     setEditModalVisible(true);
   };
   const handleEditCancel = () => {
+    setId('');
     setEditModalVisible(false);
+    getConfigList({}).then();
   };
 
-  // @ts-ignore
-  // @ts-ignore
   return (
     <PageContainer
       header={{
@@ -252,27 +239,26 @@ const InterfaceManager: React.FC = () => {
           : []
       }
     >
-      <SearchInterface
+      <SearchConfig
         // @ts-ignore
-        getSearchInterfaceList={getInterfaceList}
-        resetInterfaceList={resetInterfaceList}
-      />
+        onAddConfig={handleAddConfig} />
       <Divider />
       <Table
         // title={()=><Button type={"dashed"}>管理员</Button>}
         rowSelection={rowSelection}
-        dataSource={interfaceList}
+        dataSource={configList}
         columns={columns}
         rowKey={(record) => record.id as number}
         pagination={paginationOption}
       />
-      <UpdateInterface
+      <UpdateConfig
         editModalVisible={editModalVisible}
-        id={interfaceId}
+        id={id}
+        isEdit={editFlag}
         handleEditCancel={handleEditCancel}
       />
     </PageContainer>
   );
 };
 
-export default InterfaceManager;
+export default Config;

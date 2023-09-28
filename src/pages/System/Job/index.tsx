@@ -1,78 +1,49 @@
-import UpdateInterface from '@/pages/Admin/Interface/components/UpdateInterface';
-import {
-  deleteInterfaceBatch,
-  deleteInterfaceById,
-  editInterface,
-  listInterfaceInfo,
-} from '@/services/api/interface';
+import SearchJob from '@/pages/System/Job/components/SearchJob';
+import UpdateJob from '@/pages/System/Job/components/UpdateJob';
+import { deleteInterfaceBatch } from '@/services/api/interface';
+import { changeJobStatus, deleteJobById, listJob } from '@/services/api/job';
 import { PageContainer } from '@ant-design/pro-components';
 import { Button, Divider, message, Popconfirm, Space, Switch, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { TableRowSelection } from 'antd/es/table/interface';
 import React, { useEffect, useState } from 'react';
-import SearchInterface from "@/pages/Admin/Interface/components/SearchInterface";
 
-const InterfaceManager: React.FC = () => {
-  const columns: ColumnsType<CUSTOM_API.InterfaceInfo> = [
+const Job: React.FC = () => {
+  const columns: ColumnsType<API.SysConfig> = [
     {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
     },
     {
-      title: '名称',
-      dataIndex: 'name',
-      key: 'name',
+      title: '任务名称',
+      dataIndex: 'jobName',
+      key: 'jobName',
       ellipsis: true,
     },
     {
-      title: '描述',
-      dataIndex: 'description',
-      key: 'description',
+      title: '任务分组',
+      dataIndex: 'jobGroup',
+      key: 'jobGroup',
       ellipsis: true,
     },
     {
-      title: 'URL',
-      dataIndex: 'url',
-      key: 'url',
+      title: '调用方法',
+      dataIndex: 'invokeTarget',
+      key: 'invokeTarget',
       ellipsis: true,
     },
     {
-      title: '请求头',
-      dataIndex: 'requestHeader',
-      key: 'requestHeader',
-    },
-    {
-      title: '响应头',
-      dataIndex: 'responseHeader',
-      key: 'responseHeader',
-    },
-    {
-      title: 'METHOD',
-      dataIndex: 'method',
-      key: 'method',
-    },
-    {
-      title: '创建人',
-      dataIndex: 'userId',
-      key: 'userId',
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'createTime',
-      key: 'createTime',
-      ellipsis: true,
-    },
-    {
-      title: '是否删除',
-      dataIndex: 'deleted',
-      key: 'deleted',
-      render: (deleted) =>
-        deleted === 0 ? (
-          <Tag color="magenta">{deleted === 0 && '未删除'}</Tag>
+      title: '并发执行',
+      dataIndex: 'concurrent',
+      key: 'concurrent',
+      render({ record }) {
+        return record?.concurrent === 0 ? (
+          <Tag color={'success'}>允许</Tag>
         ) : (
-          <Tag color="red">{deleted === 1 && '已删除'}</Tag>
-        ),
+          <Tag color={'error'}>禁止</Tag>
+        );
+      },
     },
     {
       title: '状态',
@@ -82,11 +53,34 @@ const InterfaceManager: React.FC = () => {
       render: (status: number, record) => (
         <Switch
           checked={status === 0}
-          checkedChildren="可用"
-          unCheckedChildren="关闭"
-          onClick={(checked, event) => changeInterfaceStatus(checked, record)}
+          checkedChildren="正常"
+          unCheckedChildren="暂停"
+          onClick={(checked, event) => changeStatus(checked, record)}
         />
       ),
+    },
+    {
+      title: '创建者',
+      dataIndex: 'createBy',
+      key: 'createBy',
+      ellipsis: true,
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'createTime',
+      key: 'createTime',
+      ellipsis: true,
+    },
+    {
+      title: '更新人',
+      dataIndex: 'updateBy',
+      key: 'updateBy',
+    },
+    {
+      title: '更新时间',
+      dataIndex: 'updateTime',
+      key: 'updateTime',
+      ellipsis: true,
     },
     {
       title: '操作',
@@ -98,9 +92,9 @@ const InterfaceManager: React.FC = () => {
             编辑
           </Button>
           <Popconfirm
-            title={`${record.name}`}
+            title={`${record.configKey}`}
             description={`你确定要删除吗?`}
-            onConfirm={() => removeInterfaceById(record)}
+            onConfirm={() => removeDictTypeById(record)}
             okText="确定"
             cancelText="取消"
           >
@@ -111,35 +105,34 @@ const InterfaceManager: React.FC = () => {
     },
   ];
 
-  const changeInterfaceStatus = async (checked: boolean, record: object) => {
+  const changeStatus = async (checked: boolean, record: object) => {
     const data = {
       ...record,
       status: checked ? 0 : 1,
     };
-    const res = await editInterface(data);
+    const res = await changeJobStatus(data);
     if (res?.code === 200) {
-      await getInterfaceList({
+      await getJobList({
         current: paginationOption.current,
         size: paginationOption.size,
       });
     }
   };
 
-  const [interfaceList, setInterfaceList] = useState<CUSTOM_API.InterfaceInfo[]>([]);
   useEffect(() => {
     // 初始化接口数据
-    getInterfaceList({}).then();
+    getJobList({}).then();
   }, []);
   /**
    * 根据ID删除接口（逻辑）
    */
-  const removeInterfaceById = async (record: CUSTOM_API.InterfaceInfo) => {
-    const res = await deleteInterfaceById({
-      ids: [record?.id],
+  const removeDictTypeById = async (record: API.SysJob) => {
+    const res = await deleteJobById({
+      id: record?.id,
     });
     if (res?.code === 200) {
       message.success(res?.message);
-      await getInterfaceList({});
+      await getJobList({});
       return;
     }
     message.error(res?.message);
@@ -153,7 +146,7 @@ const InterfaceManager: React.FC = () => {
     });
     if (res?.code === 200) {
       message.success('删除成功');
-      await getInterfaceList({});
+      await getJobList({});
       return;
     }
     message.error(res?.message);
@@ -181,30 +174,32 @@ const InterfaceManager: React.FC = () => {
   /**
    * 获取接口集合
    */
-  const getInterfaceList = async (data: object) => {
-    const res = await listInterfaceInfo(data);
+  const [jobList, setJobList] = useState<any>([]);
+  const getJobList = async (params: any) => {
+    const res = await listJob(params);
     if (res?.code === 200) {
-      setInterfaceList(res?.data?.records);
+      setJobList(res?.data?.records);
       setPaginationOption({
         ...paginationOption,
         current: res?.data?.current,
         size: res?.data?.size,
-        page: res?.data?.page,
         total: res?.data?.total,
       });
     }
   };
+
   /**
    * 重置
    */
-  const resetInterfaceList = async () => {
-    await getInterfaceList({});
+  const resetJobList = () => {
+    getJobList({}).then();
   };
+
   /**
    * 表格分页
    */
   const onPageChange = async (current: number, size: number) => {
-    await getInterfaceList({
+    await getJobList({
       current,
       size,
     });
@@ -217,17 +212,17 @@ const InterfaceManager: React.FC = () => {
     total: 10,
   });
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [interfaceId, setInterfaceId] = useState<any>();
-  const showEditModal = (record: CUSTOM_API.InterfaceInfo) => {
-    setInterfaceId(record?.id);
+  const [id, setId] = useState<any>('');
+  const showEditModal = (record: API.SysJob) => {
+    setId(record?.id);
     setEditModalVisible(true);
   };
   const handleEditCancel = () => {
+    setId('');
     setEditModalVisible(false);
+    getJobList({}).then();
   };
 
-  // @ts-ignore
-  // @ts-ignore
   return (
     <PageContainer
       header={{
@@ -252,27 +247,21 @@ const InterfaceManager: React.FC = () => {
           : []
       }
     >
-      <SearchInterface
+      <SearchJob
         // @ts-ignore
-        getSearchInterfaceList={getInterfaceList}
-        resetInterfaceList={resetInterfaceList}
-      />
+        getSearchJobList={getJobList} resetSearchJobList={resetJobList} />
       <Divider />
       <Table
         // title={()=><Button type={"dashed"}>管理员</Button>}
         rowSelection={rowSelection}
-        dataSource={interfaceList}
+        dataSource={jobList}
         columns={columns}
         rowKey={(record) => record.id as number}
         pagination={paginationOption}
       />
-      <UpdateInterface
-        editModalVisible={editModalVisible}
-        id={interfaceId}
-        handleEditCancel={handleEditCancel}
-      />
+      <UpdateJob editModalVisible={editModalVisible} id={id} handleEditCancel={handleEditCancel} />
     </PageContainer>
   );
 };
 
-export default InterfaceManager;
+export default Job;

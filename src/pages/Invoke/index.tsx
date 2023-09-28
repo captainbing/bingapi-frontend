@@ -1,56 +1,106 @@
-import { AndroidOutlined, AppleOutlined } from '@ant-design/icons';
+import {AndroidOutlined, AppleOutlined, EllipsisOutlined, FolderOutlined, SearchOutlined} from '@ant-design/icons';
 
 import { PageContainer } from '@ant-design/pro-components';
 import {
   AutoComplete,
   Button,
   Col,
-  Divider,
-  Drawer,
+  Divider, Dropdown,
   Form,
   FormInstance,
   Input,
-  InputRef,
+  InputRef, MenuProps,
   message,
-  Popconfirm, RadioChangeEvent,
+  Popconfirm,
   Row,
   Select,
   Space,
   Table,
-  Tabs, Tree,
+  Tabs,
+  Tree,
 } from 'antd';
 
+import DrawerInterface from '@/pages/Invoke/components/DrawerInterface';
+import TabInterface from '@/pages/Invoke/components/TabInterface';
+import { getInterfaceById } from '@/services/api/interface';
+import { invokeInterface } from '@/services/api/invoke';
+import { DirectoryTreeProps } from 'antd/es/tree';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import JSONPretty from 'react-json-pretty';
 import { useLocation, useParams } from 'react-router';
 import { useSearchParams } from 'react-router-dom';
-import {DirectoryTreeProps} from "antd/es/tree";
-import DrawerInterface from "@/pages/Invoke/components/DrawerInterface";
-import TabInterface from "@/pages/Invoke/components/TabInterface";
-import {getInterfaceById} from "@/services/api/interface";
-import {invokeInterface} from "@/services/api/invoke";
 
 const { DirectoryTree } = Tree;
-
-const treeData: any= [
+const items: MenuProps['items'] = [
   {
-    title: 'parent 0',
+    key: '1',
+    label: (
+      <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
+        增
+      </a>
+    ),
+  },
+  {
+    key: '2',
+    label: (
+      <a target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
+        删
+      </a>
+    ),
+  },
+  {
+    key: '3',
+    label: (
+      <a target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
+        改
+      </a>
+    ),
+  },
+  {
+    key: '4',
+    label: (
+      <a target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
+        查
+      </a>
+    ),
+  },
+];
+const treeData: any = [
+  {
+    title: (
+      <>
+        'parent 0'
+        <Dropdown menu={{ items }} placement="bottomLeft" arrow={{ pointAtCenter: true }}>
+          <Button type="dashed" size="small" shape="circle" icon={<EllipsisOutlined />} />
+        </Dropdown>
+      </>
+    ),
     key: '0-0',
     children: [
-      { title: 'leaf 0-0', key: '0-0-0', isLeaf: true },
-      { title: 'leaf 0-1', key: '0-0-1', isLeaf: true },
+      {
+        title: (
+          <>
+            'leaf 0-0'
+            <Dropdown menu={{ items }} placement="bottomLeft" arrow={{ pointAtCenter: true }}>
+              <Button type="dashed" size="small" shape="circle" icon={<EllipsisOutlined />} />
+            </Dropdown>
+          </>
+        ),
+        key: '0-0-0',
+        isLeaf: false,
+      },
+      { title: 'leaf 0-1', key: '0-0-1', isLeaf: false },
     ],
   },
   {
     title: 'parent 1',
     key: '0-1',
     children: [
-      { title: 'leaf 1-0', key: '0-1-0', isLeaf: true },
+      { title: 'leaf 1-0', key: '0-1-0', isLeaf: true, icon: <FolderOutlined /> },
       { title: 'leaf 1-1', key: '0-1-1', isLeaf: true },
     ],
   },
 ];
-
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
@@ -162,7 +212,7 @@ const Index: React.FC = () => {
   const [selectedHeaderRowKeys, setSelectedHeaderRowKeys] = useState<React.Key[]>([]);
   const params = useParams();
   const searchParams = useSearchParams();
-  const location:any = useLocation();
+  const location: any = useLocation();
   useEffect(() => {
     const id = location.state?.interfaceId;
     if (id) {
@@ -269,8 +319,6 @@ const Index: React.FC = () => {
         ) : null,
     },
   ];
-
-
 
   const handleAdd = () => {
     const newData: DataType = {
@@ -379,10 +427,15 @@ const Index: React.FC = () => {
    * 切换tab的回调函数
    * @param key
    */
-  const onTabChange = (key:any) => {
-    alert(key)
-  }
+  const onTabChange = (key: any) => {
+    alert(key);
+  };
+  const tabRef = useRef();
+
   const onSelect: DirectoryTreeProps['onSelect'] = (keys, info) => {
+    // @ts-ignore
+    tabRef.current && tabRef.current.test(info.node.key, info.node.title, info.node.isLeaf);
+
     console.log('Trigger Select', keys, info);
   };
 
@@ -415,7 +468,7 @@ const Index: React.FC = () => {
       value: 'PATCH',
       label: 'PATCH',
     },
-  ]
+  ];
 
   return (
     <PageContainer
@@ -438,7 +491,7 @@ const Index: React.FC = () => {
         <Col span={18} offset={1}>
           <Row gutter={0}>
             <Col className="gutter-row" span={24}>
-              <TabInterface/>
+              <TabInterface ref={tabRef} />
               <Space.Compact block={true}>
                 <Select
                   size="large"
@@ -457,9 +510,11 @@ const Index: React.FC = () => {
                   options={[
                     { value: 'http://localhost:9527/sys/interface/listInterfaces?id=11' },
                     { value: 'http://localhost:9527/sys/invoke/post' },
-                    { value: 'https://q.qlogo.cn/g?b=qq&nk=750321038&s=640'},
-                    { value: 'http://q.qlogo.cn/headimg_dl?dst_uin=750321038&spec=640&img_type=jpg'},
-                    { value: 'http://localhost:9527/sys/invoke/qq?qq=750321038'},
+                    { value: 'https://q.qlogo.cn/g?b=qq&nk=750321038&s=640' },
+                    {
+                      value: 'http://q.qlogo.cn/headimg_dl?dst_uin=750321038&spec=640&img_type=jpg',
+                    },
+                    { value: 'http://localhost:9527/sys/invoke/qq?qq=750321038' },
                   ]}
                 />
                 <Button type="primary" size="large" onClick={invokeAnotherInterface}>
@@ -478,9 +533,9 @@ const Index: React.FC = () => {
               {
                 label: (
                   <span>
-                <AppleOutlined />
-                Params
-              </span>
+                    <AppleOutlined />
+                    Params
+                  </span>
                 ),
                 key: 'params',
                 children: (
@@ -504,9 +559,9 @@ const Index: React.FC = () => {
               {
                 label: (
                   <span>
-                <AndroidOutlined />
-                Headers
-              </span>
+                    <AndroidOutlined />
+                    Headers
+                  </span>
                 ),
                 key: 'headers',
                 children: (
@@ -530,9 +585,9 @@ const Index: React.FC = () => {
               {
                 label: (
                   <span>
-                <AndroidOutlined />
-                Body
-              </span>
+                    <AndroidOutlined />
+                    Body
+                  </span>
                 ),
                 key: 'body',
                 children: 'BODY',
@@ -542,7 +597,6 @@ const Index: React.FC = () => {
           <Divider children="Response" orientation="left" />
           <JSONPretty json={baseResponse}></JSONPretty>
         </Col>
-
       </Row>
 
       <DrawerInterface

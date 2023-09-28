@@ -1,9 +1,10 @@
-import {request} from "@@/exports";
-import {SYS_URL} from "@/services/api/config";
-
 /** 获取登陆人信息 */
+import {request} from "@umijs/max";
+import {SYS_URL} from "@/services/api/configurl";
+
+
 export async function getUserById(params:object,options?: { [key: string]: any }) {
-  return request<any>(SYS_URL + '/sys/user/get', {
+  return request<any>(SYS_URL + '/user/get', {
     method: 'GET',
     params,
     ...(options || {}),
@@ -14,7 +15,7 @@ export async function getUserById(params:object,options?: { [key: string]: any }
 export async function currentUser(params:object,options?: { [key: string]: any }) {
   return request<{
     data: API.CurrentUser;
-  }>(SYS_URL + '/sys/user/getLoginUser', {
+  }>(SYS_URL + '/user/getLoginUser', {
     method: 'GET',
     params,
     ...(options || {}),
@@ -23,7 +24,7 @@ export async function currentUser(params:object,options?: { [key: string]: any }
 
 /** 获取所有接口的信息 */
 export async function editUserInfo(data:object,options?: { [key: string]: any }) {
-  return request<any>(SYS_URL + '/sys/user/edit', {
+  return request<any>(SYS_URL + '/user/edit', {
     method: 'POST',
     data,
     ...(options || {}),
@@ -32,7 +33,7 @@ export async function editUserInfo(data:object,options?: { [key: string]: any })
 
 /** 获取所有用户的信息 */
 export async function listUser(data:object,options?: { [key: string]: any }) {
-  return request<any>(SYS_URL + '/sys/user/list', {
+  return request<any>(SYS_URL + '/user/list', {
     method: 'POST',
     data,
     ...(options || {}),
@@ -41,7 +42,7 @@ export async function listUser(data:object,options?: { [key: string]: any }) {
 
 /** 获取所有用户的信息 */
 export async function deleteUserBatch(data:object,options?: { [key: string]: any }) {
-  return request<any>(SYS_URL + '/sys/user/remove', {
+  return request<any>(SYS_URL + '/user/remove', {
     method: 'POST',
     data,
     ...(options || {}),
@@ -50,7 +51,7 @@ export async function deleteUserBatch(data:object,options?: { [key: string]: any
 
 /** 修改当前用户密码 */
 export async function updateUserPassword(data:object,options?: { [key: string]: any }) {
-  return request<any>(SYS_URL + '/sys/user/modify', {
+  return request<any>(SYS_URL + '/user/modify', {
     method: 'POST',
     data,
     ...(options || {}),

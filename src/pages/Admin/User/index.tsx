@@ -6,6 +6,7 @@ import type { FormInstance } from 'antd/es/form';
 import { TableRowSelection } from "antd/es/table/interface";
 import React,{ useContext,useEffect,useRef,useState } from 'react';
 import {deleteUserBatch, editUserInfo, listUser} from "@/services/api/user";
+import SearchUser from "@/pages/Admin/User/components/SearchUser";
 
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 
@@ -110,55 +111,54 @@ type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>;
  * @constructor
  */
 const UserManager = ()=>{
+  const [userDataSource, setUserDataSource] = useState([]);
 
-  const [userDataSource, setUserDataSource] = useState([])
-
-  const getUserList = async (data:object) => {
-    const res = await listUser(data)
-    if (res?.code === 200){
-      setUserDataSource(res?.data?.records)
+  const getUserList = async (data: object) => {
+    const res = await listUser(data);
+    if (res?.code === 200) {
+      setUserDataSource(res?.data?.records);
       setPaginationOption({
         ...paginationOption,
         current: res?.data?.current,
         size: res?.data?.size,
         page: res?.data?.page,
-        total: res?.data?.total
-      })
+        total: res?.data?.total,
+      });
     }
-  }
-  useEffect(()=>{
-    getUserList({}).then()
-  },[])
+  };
+  useEffect(() => {
+    getUserList({}).then();
+  }, []);
 
   /**
    * 删除用户
    * @param id
    */
-  const handleDeleteUser = async (id:number) => {
+  const handleDeleteUser = async (id: number) => {
     const res = await deleteUserBatch({
-      ids:[id]
-    })
-    if (res?.code === 200){
-      message.success("删除成功")
-      await getUserList({})
-      return
+      ids: [id],
+    });
+    if (res?.code === 200) {
+      message.success('删除成功');
+      await getUserList({});
+      return;
     }
-    message.error(res?.message)
-  }
+    message.error(res?.message);
+  };
   /**
    * 编辑用户
    * @param id
    */
-  const [editModalVisible,setEditModalVisible] = useState(false)
-  const [id,setId] = useState<number>()
-  const handleEditUser = (id:number) => {
-    setId(id)
-    setEditModalVisible(true)
-  }
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [id, setId] = useState<number>();
+  const handleEditUser = (id: number) => {
+    setId(id);
+    setEditModalVisible(true);
+  };
   const handleEditCancel = async () => {
-    setEditModalVisible(false)
-    await getUserList({})
-  }
+    setEditModalVisible(false);
+    await getUserList({});
+  };
 
   const userColumns: (ColumnTypes[number] & { editable?: boolean; dataIndex: string })[] = [
     {
@@ -169,58 +169,69 @@ const UserManager = ()=>{
       title: '昵称',
       dataIndex: 'userName',
       editable: true,
+      ellipsis: true,
     },
     {
       title: '邮箱',
       dataIndex: 'userAccount',
+      ellipsis: true,
     },
     {
       title: '角色',
       dataIndex: 'userRole',
-      editable:true,
-      width:'7%'
+      editable: true,
+      width: '7%',
     },
     {
       title: '简介',
       dataIndex: 'userProfile',
       editable: true,
-      width:"10%",
-      ellipsis:true
+      width: '10%',
+      ellipsis: true,
     },
     {
       title: '头像',
       dataIndex: 'userAvatar',
       width: '20%',
-      ellipsis:{
-        showTitle:true
-      }
+      ellipsis: {
+        showTitle: true,
+      },
     },
     {
       title: '状态',
       dataIndex: 'userStatus',
-      width:"8%",
-      render(_,record){
+      width: '8%',
+      render(_, record) {
         return (
-        <Switch checked={record?.userStatus === 1} checkedChildren="BAN" unCheckedChildren="正常"
-                onClick={(checked, event)=>changeUserStatus(checked,record)}
-        />
-        )
-      }
+          <Switch
+            checked={record?.userStatus === 1}
+            checkedChildren="BAN"
+            unCheckedChildren="正常"
+            onClick={(checked, event) => changeUserStatus(checked, record)}
+          />
+        );
+      },
     },
     {
       title: '创建时间',
       dataIndex: 'createTime',
-      width:"15%"
+      width: '15%',
     },
     {
       title: 'operation',
       dataIndex: 'operation',
-      width:"15%",
-      render: (_, record:any) =>
+      width: '15%',
+      render: (_, record: any) =>
         userDataSource.length >= 1 ? (
           <>
-            <Button type={'dashed'} onClick={()=>handleEditUser(record?.id)}>编辑</Button>
-            <Popconfirm title={record?.userName} description={`你确定要删除${record?.userName}吗?`} onConfirm={() => handleDeleteUser(record?.id)}>
+            <Button type={'dashed'} onClick={() => handleEditUser(record?.id)}>
+              编辑
+            </Button>
+            <Popconfirm
+              title={record?.userName}
+              description={`你确定要删除${record?.userName}吗?`}
+              onConfirm={() => handleDeleteUser(record?.id)}
+            >
               <Button type={'dashed'}>删除</Button>
             </Popconfirm>
           </>
@@ -247,9 +258,7 @@ const UserManager = ()=>{
     onSelect: onSelect,
   };
 
-  const handleSave = (row:any) => {
-
-  };
+  const handleSave = (row: any) => {};
 
   const components = {
     body: {
@@ -264,7 +273,7 @@ const UserManager = ()=>{
     }
     return {
       ...col,
-      onCell: (record:any) => ({
+      onCell: (record: any) => ({
         record,
         editable: col.editable,
         dataIndex: col.dataIndex,
@@ -278,81 +287,73 @@ const UserManager = ()=>{
    */
   const removeUserBatch = async () => {
     const res = await deleteUserBatch({
-      ids:selectedRowKeys
-    })
-    if (res?.code === 200){
-      message.success("删除成功")
-      await getUserList({})
-      return
+      ids: selectedRowKeys,
+    });
+    if (res?.code === 200) {
+      message.success('删除成功');
+      await getUserList({});
+      return;
     }
-    message.error(res?.message)
-  }
+    message.error(res?.message);
+  };
 
   /**
    * 搜索接口相关参数
    */
-  const [userName,setUserName] =useState("")
-  const [userRole,setUserRole] =useState("")
-  const [userStatus,setUserStatus] =useState("")
-
-  const searchInterfaceList = async () => {
-    await getUserList({
-      userName,
-      userRole,
-      userStatus,
-    })
-  }
+  const [userName, setUserName] = useState('');
+  const [userRole, setUserRole] = useState('');
+  const [userStatus, setUserStatus] = useState('');
 
   /**
    * 重置
    */
-  const resetInterfaceList = async () => {
-    setUserName("")
-    setUserRole("")
-    setUserStatus("")
-    await getUserList({})
-  }
+  const resetUserList = async () => {
+    setUserName('');
+    setUserRole('');
+    setUserStatus('');
+    await getUserList({});
+  };
 
   /**
    * 根据id修改用户状态
    * @param record
    */
-  const changeUserStatus = async (checked:boolean,record:object) => {
+  const changeUserStatus = async (checked: boolean, record: object) => {
     const data = {
       ...record,
-      userStatus:checked ? 1 : 0
-    }
-    const res = await editUserInfo(data)
-    if (res?.code === 200){
+      userStatus: checked ? 1 : 0,
+    };
+    const res = await editUserInfo(data);
+    if (res?.code === 200) {
       await getUserList({
         userName,
         userStatus,
         userRole,
-        current:paginationOption.current,
-        size:paginationOption.size
-      })
+        current: paginationOption.current,
+        size: paginationOption.size,
+      });
     }
-  }
+  };
 
   /**
    * 表格分页
    */
-  const onPageChange = async (current:number,size:number) => {
+  const onPageChange = async (current: number, size: number) => {
     await getUserList({
       userName,
       userRole,
       userStatus,
       current,
-      size
-    })
-  }
-  const [paginationOption,setPaginationOption] = useState<any>({
+      size,
+    });
+  };
+  const [paginationOption, setPaginationOption] = useState<any>({
     onChange: onPageChange,
-    current:1,
-    size:10,
-    page:1,
-    total:10,
-  })
+    current: 1,
+    size: 10,
+    page: 1,
+    total: 10,
+  });
 
   return (
     <PageContainer
@@ -363,95 +364,38 @@ const UserManager = ()=>{
       footer={
         selectedRowKeys.length > 0
           ? [
-            <Popconfirm
-              title=""
-              description={`你确定要删除吗?`}
-              onConfirm={removeUserBatch}
-              okText="确定"
-              cancelText="取消"
-            >
-              <Button type="dashed">批量删除</Button>
-            </Popconfirm>,
-          ]
+              <Popconfirm
+                title=""
+                description={`你确定要删除吗?`}
+                onConfirm={removeUserBatch}
+                okText="确定"
+                cancelText="取消"
+              >
+                <Button type="dashed">批量删除</Button>
+              </Popconfirm>,
+            ]
           : []
       }
     >
+      <SearchUser
+        // @ts-ignore
+        getSearchUserList={getUserList}
+        resetUserList={resetUserList} />
 
-        <Row>
-          <Col span={5} offset={3}>
-            <Space size={'middle'}>
-              名称:
-              <Input
-                placeholder="名称"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-              />
-            </Space>
-          </Col>
-          <Col span={5} offset={1}>
-            <Space>
-              角色:
-              <Select
-                defaultValue=""
-                value={userRole}
-                style={{ width: 120 }}
-                allowClear
-                onChange={(value) => setUserRole(value)}
-                options={[
-                  { value: 'admin', label: 'admin' },
-                  { value: 'user', label: 'user' },
-                ]}
-              />
-            </Space>
-          </Col>
-          <Col span={5} offset={1}>
-            <Space>
-              状态:
-              <Select
-                defaultValue=""
-                value={userStatus}
-                style={{ width: 120 }}
-                allowClear
-                onChange={(value) => setUserStatus(value)}
-                options={[
-                  { value: 0, label: '正常' },
-                  { value: 1, label: 'BAN' },
-                ]}
-              />
-            </Space>
-          </Col>
-          <Col span={4}>
-            <Row>
-              <Col offset={8}>
-                <Button type={'primary'} onClick={searchInterfaceList}>
-                  搜索
-                </Button>
-                <Button type={'primary'} onClick={resetInterfaceList}>
-                  重置
-                </Button>
-              </Col>
-            </Row>
-          </Col>
-        </Row>
+      <Divider />
 
-      <Divider/>
-
-        <Table
-          components={components}
-          rowClassName={() => 'editable-row'}
-          bordered
-          dataSource={userDataSource}
-          columns={columns as ColumnTypes}
-          rowKey={(record) => record.id as number}
-          size={"middle"}
-          rowSelection={rowSelection}
-          pagination={paginationOption}
-        />
-      <UpdateUser
-        editModalVisible={editModalVisible}
-        id={id}
-        handleEditCancel={handleEditCancel}
+      <Table
+        components={components}
+        rowClassName={() => 'editable-row'}
+        bordered
+        dataSource={userDataSource}
+        columns={columns as ColumnTypes}
+        rowKey={(record) => record.id as number}
+        size={'middle'}
+        rowSelection={rowSelection}
+        pagination={paginationOption}
       />
+      <UpdateUser editModalVisible={editModalVisible} id={id} handleEditCancel={handleEditCancel} />
     </PageContainer>
   );
 }

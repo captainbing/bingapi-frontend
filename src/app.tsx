@@ -1,16 +1,14 @@
-import { Question,SelectLang } from '@/components/RightContent';
+import { Question } from '@/components/RightContent';
+import { getUserById } from '@/services/api/user';
 import { LinkOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
-import { history,Link } from '@umijs/max';
-import { Button } from "antd";
+import { history, Link } from '@umijs/max';
+import { Button } from 'antd';
 import defaultSettings from '../config/defaultSettings';
-import { AvatarDropdown,AvatarName } from './components/RightContent/AvatarDropdown';
+import { AvatarDropdown, AvatarName } from './components/RightContent/AvatarDropdown';
 import { errorConfig } from './requestErrorConfig';
-import {getUserById} from "@/services/api/user";
-
-
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
 
@@ -28,14 +26,14 @@ export async function getInitialState(): Promise<{
       // const msg = await queryCurrentUser({userAccount:user?.userAccount},{
       //   skipErrorHandler: true,
       // });
-      const {id} = JSON.parse(localStorage.getItem("token") as any);
+      const { id } = JSON.parse(localStorage.getItem('token') as any);
       const res = await getUserById({
-        id
-      })
-      if (res?.code === 200){
-        return res?.data
+        id,
+      });
+      if (res?.code === 200) {
+        return res?.data;
       }
-      return undefined
+      return undefined;
     } catch (error) {
       history.push(loginPath);
     }
@@ -43,7 +41,7 @@ export async function getInitialState(): Promise<{
   // 如果不是登录页面，执行
   const { location } = history;
   if (location.pathname !== loginPath) {
-    const currentUser:any = await fetchUserInfo();
+    const currentUser: any = await fetchUserInfo();
     return {
       currentUser,
       fetchUserInfo,
@@ -59,7 +57,7 @@ export async function getInitialState(): Promise<{
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
   return {
-    actionsRender: () => [<Question key="doc" />, <SelectLang key="SelectLang" />,<Button type={"dashed"}>测试</Button>],
+    actionsRender: () => [<Question key="doc" />, <Button type={'dashed'}>测试</Button>],
     avatarProps: {
       src: initialState?.currentUser?.userAvatar,
       title: <AvatarName />,

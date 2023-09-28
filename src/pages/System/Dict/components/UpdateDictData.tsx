@@ -1,13 +1,15 @@
-import { editInterface,getInterfaceById } from '@/services/api/interface';
+import { getConfigById, updateConfig } from '@/services/api/sysconfig';
 import { SizeType } from '@ant-design/pro-form/es/BaseForm';
-import { Col,Form,Input,message,Modal,Row,Select } from 'antd';
-import { useEffect,useState } from 'react';
+import { Col, DatePicker, Form, Input, message, Modal, Row, Select } from 'antd';
+import dayjs from 'dayjs';
+import { useEffect, useState } from 'react';
 import JSONPretty from 'react-json-pretty';
+import {getDictDataById, updateDictData} from "@/services/api/dictdata";
 
 /**
  * 编辑接口
  */
-const UpdateInterface = ({ id, editModalVisible, handleEditCancel }: any) => {
+const UpdateDictData = ({ id, editDictDataModalVisible, handleEditDictDataCancel }: any) => {
   const [form] = Form.useForm();
   const [componentSize, setComponentSize] = useState<SizeType | 'default'>('default');
 
@@ -15,7 +17,7 @@ const UpdateInterface = ({ id, editModalVisible, handleEditCancel }: any) => {
     setComponentSize(size);
   };
   useEffect(() => {
-    getInterfaceById({
+    getDictDataById({
       id,
     }).then((res) => {
       form.setFieldsValue(res?.data);
@@ -23,11 +25,11 @@ const UpdateInterface = ({ id, editModalVisible, handleEditCancel }: any) => {
   }, [id]);
 
   const handleEditOk = async () => {
-    console.log(form.getFieldsValue(true));
-    const res = await editInterface(form.getFieldsValue(true));
+    console.log(form.getFieldsValue());
+    const res = await updateDictData(form.getFieldsValue(true));
     if (res?.code === 200) {
       message.success('修改成功');
-      handleEditCancel();
+      handleEditDictDataCancel();
       return;
     }
     message.error(res?.message);
@@ -37,9 +39,9 @@ const UpdateInterface = ({ id, editModalVisible, handleEditCancel }: any) => {
     <Modal
       title="编辑"
       width={1000}
-      open={editModalVisible}
+      open={editDictDataModalVisible}
       onOk={handleEditOk}
-      onCancel={handleEditCancel}
+      onCancel={handleEditDictDataCancel}
     >
       <Form
         form={form}
@@ -53,13 +55,13 @@ const UpdateInterface = ({ id, editModalVisible, handleEditCancel }: any) => {
       >
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item label="接口名称" name="name">
+            <Form.Item label="字典标签" name="dictLabel">
               <Input />
             </Form.Item>
           </Col>
 
           <Col span={12}>
-            <Form.Item label="描述" name="description">
+            <Form.Item label="字典键值" name="dictValue">
               <Input />
             </Form.Item>
           </Col>
@@ -67,7 +69,7 @@ const UpdateInterface = ({ id, editModalVisible, handleEditCancel }: any) => {
 
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item label="URL" name="url">
+            <Form.Item label="字典排序" name="dictSort">
               <Input />
             </Form.Item>
           </Col>
@@ -75,8 +77,8 @@ const UpdateInterface = ({ id, editModalVisible, handleEditCancel }: any) => {
           <Col span={12}>
             <Form.Item label="状态" name="status">
               <Select>
-                <Select.Option value={0}>开启</Select.Option>
-                <Select.Option value={1}>关闭</Select.Option>
+                <Select.Option value={'0'}>正常</Select.Option>
+                <Select.Option value={'1'}>停用</Select.Option>
               </Select>
             </Form.Item>
           </Col>
@@ -84,12 +86,12 @@ const UpdateInterface = ({ id, editModalVisible, handleEditCancel }: any) => {
 
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item label="请求头" name="requestHeader">
+            <Form.Item label="创建者" name="createBy">
               <Input />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="响应头" name="responseHeader">
+            <Form.Item label="更新人" name="updateBy">
               <Input />
             </Form.Item>
           </Col>
@@ -97,34 +99,16 @@ const UpdateInterface = ({ id, editModalVisible, handleEditCancel }: any) => {
 
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item label="Method" name="method">
+            <Form.Item label="是否默认" name="defaultFlag">
               <Select>
-                <Select.Option value="GET">GET</Select.Option>
-                <Select.Option value="POST">POST</Select.Option>
-                <Select.Option value="PUT">PUT</Select.Option>
-                <Select.Option value="DELETE">DELETE</Select.Option>
+                <Select.Option value={'Y'}>是</Select.Option>
+                <Select.Option value={'N'}>否</Select.Option>
               </Select>
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="创建人" name="userId">
-              <Input />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={24}>
-          <Col span={12}>
-            <Form.Item label="总调用次数" name="invokeTotal">
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="是否删除" name="deleted">
-              <Select>
-                <Select.Option value={0}>否</Select.Option>
-                <Select.Option value={1}>是</Select.Option>
-              </Select>
+            <Form.Item label="备注" name="remark">
+              <Input.TextArea />
             </Form.Item>
           </Col>
         </Row>
@@ -132,5 +116,6 @@ const UpdateInterface = ({ id, editModalVisible, handleEditCancel }: any) => {
       <JSONPretty json={form.getFieldsValue(true)}></JSONPretty>
     </Modal>
   );
-}
-export default UpdateInterface
+};
+
+export default UpdateDictData;

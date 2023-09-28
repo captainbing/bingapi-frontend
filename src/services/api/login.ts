@@ -1,5 +1,5 @@
 import {request} from "@@/exports";
-import {SYS_URL} from "@/services/api/config";
+import {SYS_URL} from "@/services/api/configurl";
 
 /** 发送验证码 POST /api/login/captcha */
 export async function getFakeCaptcha(
@@ -10,7 +10,7 @@ export async function getFakeCaptcha(
   },
   options?: { [key: string]: any },
 ) {
-  return request<API.FakeCaptcha>(SYS_URL + '/sys/user/captcha', {
+  return request<API.FakeCaptcha>(SYS_URL + '/user/captcha', {
     method: 'GET',
     params: {
       ...params,
@@ -21,7 +21,7 @@ export async function getFakeCaptcha(
 
 /** 退出登录接口 POST /api/login/outLogin */
 export async function outLogin(options?: { [key: string]: any }) {
-  return request<Record<string, any>>(SYS_URL + '/sys/user/logout', {
+  return request<Record<string, any>>(SYS_URL + '/user/logout', {
     method: 'POST',
     ...(options || {}),
   });
@@ -30,7 +30,7 @@ export async function outLogin(options?: { [key: string]: any }) {
 /** 登录接口 POST /api/login/account */
 export async function login(body: API.LoginParams, options?: { [key: string]: any }) {
   if (body?.type === 'password'){
-    return request<API.LoginResult>(SYS_URL + '/sys/user/login', {
+    return request<API.LoginResult>(SYS_URL + '/user/login', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export async function login(body: API.LoginParams, options?: { [key: string]: an
       captcha:body.captcha,
       autoLogin:body.autoLogin
     }
-    return request<API.LoginResult>(SYS_URL + '/sys/user/captchaLogin', {
+    return request<API.LoginResult>(SYS_URL + '/user/captchaLogin', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

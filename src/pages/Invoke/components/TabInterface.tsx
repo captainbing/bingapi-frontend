@@ -1,15 +1,28 @@
 import {Button, message, Tabs} from "antd";
-import React, {useRef, useState} from "react";
+import React, {forwardRef, useImperativeHandle, useRef, useState} from "react";
 
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
 const defaultPanes = new Array(2).fill(null).map((_, index) => {
   const id = String(index + 1);
-  return { label: `Tab ${id}`, children: `Content of Tab Pane ${index + 1}`, key: id };
+  return { label: `Tab ${id}`, children: '', key: id };
 });
 
+const TabInterface = forwardRef(({}, ref: any) => {
+  const test = (key: string, title: string, isLeaf: boolean) => {
+    if (!isLeaf) {
+      // 类型为目录
+      return;
+    }
+    if (items.find((item) => item.key === key)) {
+      setActiveKey(key);
+      return;
+    }
+    setItems([...items, { label: title, children: '', key: key }]);
+    setActiveKey(key);
+  };
 
-const TabInterface = () => {
+  useImperativeHandle(ref, () => ({ test }));
 
   const [activeKey, setActiveKey] = useState(defaultPanes[0].key);
   const [items, setItems] = useState(defaultPanes);
@@ -21,14 +34,14 @@ const TabInterface = () => {
 
   const add = () => {
     const newActiveKey = `newTab${newTabIndex.current++}`;
-    setItems([...items, { label: 'New Tab', children: 'New Tab Pane', key: newActiveKey }]);
+    setItems([...items, { label: 'New Tab', children: '', key: newActiveKey }]);
     setActiveKey(newActiveKey);
   };
 
   const remove = (targetKey: TargetKey) => {
-    if (items.length === 1){
-      message.warning("至少存在一个tab")
-      return
+    if (items.length === 1) {
+      message.warning('至少存在一个tab');
+      return;
     }
     const targetIndex = items.findIndex((pane) => pane.key === targetKey);
     const newPanes = items.filter((pane) => pane.key !== targetKey);
@@ -52,15 +65,15 @@ const TabInterface = () => {
       {/*  <Button onClick={add}>ADD</Button>*/}
       {/*</div>*/}
       <Tabs
-        hideAdd
         onChange={onChange}
         activeKey={activeKey}
+        tabBarExtraContent={<Button>Extra Action</Button>}
         type="editable-card"
         onEdit={onEdit}
         items={items}
       />
     </>
-  )
-}
+  );
+});
 
-export default TabInterface
+export default TabInterface;
