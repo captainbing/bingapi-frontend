@@ -1,31 +1,36 @@
-import {AndroidOutlined, AppleOutlined, EllipsisOutlined, FolderOutlined, SearchOutlined} from '@ant-design/icons';
+import {
+  AndroidOutlined,
+  AppleOutlined,
+  EllipsisOutlined,
+  FolderOutlined, InfoCircleOutlined, PlusOutlined, SearchOutlined, UserOutlined,
+} from '@ant-design/icons';
 
 import { PageContainer } from '@ant-design/pro-components';
 import {
   AutoComplete,
   Button,
   Col,
-  Divider, Dropdown,
-  Form,
-  FormInstance,
-  Input,
-  InputRef, MenuProps,
+  Divider,
+  Dropdown, Input,
+  MenuProps,
   message,
-  Popconfirm,
   Row,
   Select,
   Space,
-  Table,
   Tabs,
+  Tag, Tooltip,
   Tree,
 } from 'antd';
 
 import DrawerInterface from '@/pages/Invoke/components/DrawerInterface';
+import RequestBody from '@/pages/Invoke/components/RequestBody';
+import RequestHeader from '@/pages/Invoke/components/RequestHeader';
+import RequestParam from '@/pages/Invoke/components/RequestParam';
 import TabInterface from '@/pages/Invoke/components/TabInterface';
 import { getInterfaceById } from '@/services/api/interface';
 import { invokeInterface } from '@/services/api/invoke';
 import { DirectoryTreeProps } from 'antd/es/tree';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import JSONPretty from 'react-json-pretty';
 import { useLocation, useParams } from 'react-router';
 import { useSearchParams } from 'react-router-dom';
@@ -35,43 +40,55 @@ const items: MenuProps['items'] = [
   {
     key: '1',
     label: (
-      <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-        增
+      <a onClick={event=>event.preventDefault()} target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
+        编辑
       </a>
     ),
   },
   {
     key: '2',
     label: (
-      <a target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
-        删
+      <a onClick={event=>event.preventDefault()} target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
+        添加菜单
       </a>
     ),
   },
   {
     key: '3',
     label: (
-      <a target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
-        改
+      <a onClick={event=>event.preventDefault()} target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
+        复制
       </a>
     ),
   },
   {
     key: '4',
     label: (
-      <a target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
-        查
+      <a onClick={event=>event.preventDefault()} target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
+        删除
       </a>
     ),
   },
 ];
+
 const treeData: any = [
   {
     title: (
       <>
         'parent 0'
-        <Dropdown menu={{ items }} placement="bottomLeft" arrow={{ pointAtCenter: true }}>
-          <Button type="dashed" size="small" shape="circle" icon={<EllipsisOutlined />} />
+        <Dropdown
+          menu={{ items,onClick:event=>event.domEvent.stopPropagation() }}
+          trigger={['click']}
+          placement="bottomLeft"
+          arrow={{ pointAtCenter: true }}
+        >
+          <Button
+            onClick={(e) => e.stopPropagation()}
+            type="dashed"
+            size="small"
+            shape="circle"
+            icon={<EllipsisOutlined />}
+          />
         </Dropdown>
       </>
     ),
@@ -81,8 +98,19 @@ const treeData: any = [
         title: (
           <>
             'leaf 0-0'
-            <Dropdown menu={{ items }} placement="bottomLeft" arrow={{ pointAtCenter: true }}>
-              <Button type="dashed" size="small" shape="circle" icon={<EllipsisOutlined />} />
+            <Dropdown
+              menu={{ items }}
+              trigger={['click']}
+              placement="bottomLeft"
+              arrow={{ pointAtCenter: true }}
+            >
+              <Button
+                onClick={(e) => e.stopPropagation()}
+                type="dashed"
+                size="small"
+                shape="circle"
+                icon={<EllipsisOutlined />}
+              />
             </Dropdown>
           </>
         ),
@@ -102,114 +130,7 @@ const treeData: any = [
   },
 ];
 
-const EditableContext = React.createContext<FormInstance<any> | null>(null);
-
-interface Item {
-  key: string;
-  name: string;
-  age: string;
-  address: string;
-}
-
-interface EditableRowProps {
-  index: number;
-}
-
-const EditableRow: React.FC<EditableRowProps> = ({ index, ...props }) => {
-  const [form] = Form.useForm();
-  return (
-    <Form form={form} component={false}>
-      <EditableContext.Provider value={form}>
-        <tr {...props} />
-      </EditableContext.Provider>
-    </Form>
-  );
-};
-
-interface EditableCellProps {
-  title: React.ReactNode;
-  editable: boolean;
-  children: React.ReactNode;
-  dataIndex: keyof Item;
-  record: Item;
-  handleSave: (record: Item) => void;
-}
-
-const EditableCell: React.FC<EditableCellProps> = ({
-  title,
-  editable,
-  children,
-  dataIndex,
-  record,
-  handleSave,
-  ...restProps
-}) => {
-  const [editing, setEditing] = useState(false);
-  const inputRef = useRef<InputRef>(null);
-  const form = useContext(EditableContext)!;
-
-  useEffect(() => {
-    if (editing) {
-      inputRef.current!.focus();
-    }
-  }, [editing]);
-
-  const toggleEdit = () => {
-    setEditing(!editing);
-    form.setFieldsValue({ [dataIndex]: record[dataIndex] });
-  };
-
-  const save = async () => {
-    try {
-      const values = await form.validateFields();
-
-      toggleEdit();
-      handleSave({ ...record, ...values });
-    } catch (errInfo) {
-      console.log('Save failed:', errInfo);
-    }
-  };
-
-  let childNode = children;
-
-  if (editable) {
-    childNode = editing ? (
-      <Form.Item
-        style={{ margin: 0 }}
-        name={dataIndex}
-        rules={[
-          {
-            required: true,
-            message: `${title} is required.`,
-          },
-        ]}
-      >
-        <Input ref={inputRef} onPressEnter={save} onBlur={save} />
-      </Form.Item>
-    ) : (
-      <div className="editable-cell-value-wrap" style={{ paddingRight: 24 }} onClick={toggleEdit}>
-        {children}
-      </div>
-    );
-  }
-
-  return <td {...restProps}>{childNode}</td>;
-};
-
-type EditableTableProps = Parameters<typeof Table>[0];
-
-interface DataType {
-  key: React.Key;
-  requestKey: string;
-  requestValue: string;
-  description: string;
-}
-
-type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>;
-
 const Index: React.FC = () => {
-  const [selectedParamRowKeys, setSelectedParamRowKeys] = useState<React.Key[]>([]);
-  const [selectedHeaderRowKeys, setSelectedHeaderRowKeys] = useState<React.Key[]>([]);
   const params = useParams();
   const searchParams = useSearchParams();
   const location: any = useLocation();
@@ -227,155 +148,7 @@ const Index: React.FC = () => {
     console.log('searchParams', searchParams);
     console.log('location', location);
   }, []);
-  // @ts-ignore
-  const onSelectParam = (record, selected, selectedRows, nativeEvent) => {
-    let requestParam = {};
-    for (let index in selectedRows) {
-      let key = selectedRows[index].requestKey as any;
-      // @ts-ignore
-      requestParam[key] = selectedRows[index].requestValue;
-    }
-    setRequestParams(requestParam);
-  };
-  // @ts-ignore
-  const onSelectAllParams = (selected, selectedRows, changeRow) => {
-    onSelectParam(null, selected, selectedRows, null);
-  };
-  const paramRowSelection = {
-    selections: false,
-    selectedParamRowKeys,
-    onSelect: onSelectParam,
-    onSelectAll: onSelectAllParams,
-  };
-  // @ts-ignore
-  const onSelectHeader = (record, selected, selectedRows, nativeEvent) => {
-    let requestHeader = {};
-    for (let index in selectedRows) {
-      let key = selectedRows[index].requestKey as any;
-      // @ts-ignore
-      requestHeader[key] = selectedRows[index].requestValue;
-    }
-    setRequestHeaders(requestHeader);
-  };
-  // @ts-ignore
-  const onSelectAllHeader = (selected, selectedRows, changeRow) => {
-    onSelectHeader(null, selected, selectedRows, null);
-  };
-  const headerRowSelection = {
-    selections: false,
-    selectedHeaderRowKeys,
-    onSelect: onSelectHeader,
-    onSelectAll: onSelectAllHeader,
-  };
-  const [dataSource, setDataSource] = useState<DataType[]>([
-    {
-      key: '0',
-      requestKey: 'key1',
-      requestValue: 'value1',
-      description: 'London, Park Lane no. 0',
-    },
-    {
-      key: '1',
-      requestKey: 'key2',
-      requestValue: 'value2',
-      description: 'London, Park Lane no. 1',
-    },
-  ]);
 
-  const [count, setCount] = useState(2);
-
-  const handleDelete = (key: React.Key) => {
-    const newData = dataSource.filter((item) => item.key !== key);
-    setDataSource(newData);
-  };
-
-  const paramColumn: (ColumnTypes[number] & { editable?: boolean; dataIndex: string })[] = [
-    {
-      title: 'Key',
-      dataIndex: 'requestKey',
-      width: '30%',
-      editable: true,
-    },
-    {
-      title: 'value',
-      dataIndex: 'requestValue',
-      width: '30%',
-      editable: true,
-    },
-    {
-      title: 'description',
-      dataIndex: 'description',
-      editable: true,
-    },
-    {
-      title: 'operation',
-      dataIndex: 'operation',
-      // @ts-ignore
-      render: (_, record: { key: React.Key }) =>
-        dataSource.length >= 1 ? (
-          <Popconfirm title="Sure to delete?" onConfirm={() => handleDelete(record.key)}>
-            <a>Delete</a>
-          </Popconfirm>
-        ) : null,
-    },
-  ];
-
-  const handleAdd = () => {
-    const newData: DataType = {
-      key: count,
-      requestKey: `Edward King ${count}`,
-      requestValue: '32',
-      description: `London, Park Lane no. ${count}`,
-    };
-    setDataSource([...dataSource, newData]);
-    setCount(count + 1);
-  };
-
-  const handleSave = (row: DataType) => {
-    const newData = [...dataSource];
-    const index = newData.findIndex((item) => row.key === item.key);
-    const item = newData[index];
-    newData.splice(index, 1, {
-      ...item,
-      ...row,
-    });
-    setDataSource(newData);
-  };
-
-  const components = {
-    body: {
-      row: EditableRow,
-      cell: EditableCell,
-    },
-  };
-
-  const paramsColumn = paramColumn.map((col) => {
-    if (!col.editable) {
-      return col;
-    }
-    return {
-      ...col,
-      onCell: (record: DataType) => ({
-        record,
-        editable: col.editable,
-        dataIndex: col.dataIndex,
-        title: col.title,
-        handleSave,
-      }),
-    };
-  });
-
-  interface DescriptionItemProps {
-    title: string;
-    content: React.ReactNode;
-  }
-
-  const DescriptionItem = ({ title, content }: DescriptionItemProps) => (
-    <div className="site-description-item-profile-wrapper">
-      <p className="site-description-item-profile-p-label">{title}:</p>
-      {content}
-    </div>
-  );
   /*** 当前需要调试的接口*/
   const [currentInterface, setCurrentInterface] = useState({});
   /*** 控制抽屉 */
@@ -427,9 +200,6 @@ const Index: React.FC = () => {
    * 切换tab的回调函数
    * @param key
    */
-  const onTabChange = (key: any) => {
-    alert(key);
-  };
   const tabRef = useRef();
 
   const onSelect: DirectoryTreeProps['onSelect'] = (keys, info) => {
@@ -446,29 +216,69 @@ const Index: React.FC = () => {
   const requestMethodOptions = [
     {
       value: 'GET',
-      label: 'GET',
+      label: (
+        <Tag bordered={false} color="processing">
+          GET
+        </Tag>
+      ),
     },
     {
       value: 'POST',
-      label: 'POST',
+      label: (
+        <Tag bordered={false} color="success">
+          POST
+        </Tag>
+      ),
     },
     {
       value: 'PUT',
-      label: 'PUT',
+      label: (
+        <Tag bordered={false} color="error">
+          PUT
+        </Tag>
+      ),
     },
     {
       value: 'DELETE',
-      label: 'DELETE',
+      label: (
+        <Tag bordered={false} color="warning">
+          DELETE
+        </Tag>
+      ),
     },
     {
       value: 'OPTIONS',
-      label: 'OPTIONS',
+      label: (
+        <Tag bordered={false} color="magenta">
+          OPTIONS
+        </Tag>
+      ),
     },
     {
       value: 'PATCH',
-      label: 'PATCH',
+      label: (
+        <Tag bordered={false} color="orange">
+          PATCH
+        </Tag>
+      ),
     },
   ];
+
+  const acceptRequestParams = (acceptParams: []) => {
+    setRequestParams(requestParams);
+    let params = '';
+    acceptParams.forEach((param) => {
+      params = params + param['requestKey'] + '=' + param['requestValue'] + '&';
+    });
+    params = params.substring(0, params.lastIndexOf('&'));
+    setUrl(url + '?' + params);
+  };
+
+  const code1 = "// your original code...";
+  const code2 = "// a different version...";
+  const options = {
+    //renderSideBySide: false
+  };
 
   return (
     <PageContainer
@@ -479,6 +289,20 @@ const Index: React.FC = () => {
     >
       <Row>
         <Col span={4}>
+          <Space.Compact>
+            <Button type="primary" shape="circle">
+              <PlusOutlined />
+            </Button>
+            <Input
+              placeholder=""
+              prefix={<SearchOutlined className="site-form-item-icon" />}
+              suffix={
+                <Tooltip title="搜索">
+                  <InfoCircleOutlined style={{ color: 'rgba(0,0,0,.45)' }} />
+                </Tooltip>
+              }
+            />
+          </Space.Compact>
           <DirectoryTree
             multiple
             defaultExpandAll
@@ -538,23 +362,7 @@ const Index: React.FC = () => {
                   </span>
                 ),
                 key: 'params',
-                children: (
-                  <>
-                    <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }}>
-                      Add a row
-                    </Button>
-                    <Table
-                      size="small"
-                      rowSelection={paramRowSelection}
-                      components={components}
-                      rowClassName={() => 'editable-row'}
-                      bordered
-                      dataSource={dataSource}
-                      columns={paramsColumn as ColumnTypes}
-                      pagination={false}
-                    />
-                  </>
-                ),
+                children: <RequestParam acceptRequestParams={acceptRequestParams} />,
               },
               {
                 label: (
@@ -564,23 +372,7 @@ const Index: React.FC = () => {
                   </span>
                 ),
                 key: 'headers',
-                children: (
-                  <>
-                    <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }}>
-                      Add a row
-                    </Button>
-                    <Table
-                      size="small"
-                      rowSelection={headerRowSelection}
-                      components={components}
-                      rowClassName={() => 'editable-row'}
-                      bordered
-                      dataSource={dataSource}
-                      columns={paramsColumn as ColumnTypes}
-                      pagination={false}
-                    />
-                  </>
-                ),
+                children: <RequestHeader />,
               },
               {
                 label: (
@@ -590,11 +382,12 @@ const Index: React.FC = () => {
                   </span>
                 ),
                 key: 'body',
-                children: 'BODY',
+                children: <RequestBody />,
               },
             ]}
           />
           <Divider children="Response" orientation="left" />
+
           <JSONPretty json={baseResponse}></JSONPretty>
         </Col>
       </Row>
