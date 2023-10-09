@@ -1,139 +1,154 @@
 import {
-  AndroidOutlined,
-  AppleOutlined,
-  EllipsisOutlined,
-  FolderOutlined, InfoCircleOutlined, PlusOutlined, SearchOutlined, UserOutlined,
+AndroidOutlined,
+AppleOutlined,
+EllipsisOutlined,InfoCircleOutlined,PlusOutlined,SearchOutlined
 } from '@ant-design/icons';
 
 import { PageContainer } from '@ant-design/pro-components';
 import {
   AutoComplete,
-  Button,
+  Button, Card,
   Col,
   Divider,
   Dropdown, Input,
   MenuProps,
-  message,
-  Row,
+  message, Popconfirm, Row,
   Select,
   Space,
   Tabs,
   Tag, Tooltip,
-  Tree,
+  Tree
 } from 'antd';
 
 import DrawerInterface from '@/pages/Invoke/components/DrawerInterface';
+import MenuModal from "@/pages/Invoke/components/MenuModal";
 import RequestBody from '@/pages/Invoke/components/RequestBody';
 import RequestHeader from '@/pages/Invoke/components/RequestHeader';
 import RequestParam from '@/pages/Invoke/components/RequestParam';
 import TabInterface from '@/pages/Invoke/components/TabInterface';
 import { getInterfaceById } from '@/services/api/interface';
-import { invokeInterface } from '@/services/api/invoke';
+import {deleteMenu, getMenuTree, invokeInterface} from '@/services/api/invoke';
 import { DirectoryTreeProps } from 'antd/es/tree';
-import React, { useEffect, useRef, useState } from 'react';
+import React,{ useEffect,useRef,useState } from 'react';
 import JSONPretty from 'react-json-pretty';
-import { useLocation, useParams } from 'react-router';
+import { useLocation,useParams } from 'react-router';
 import { useSearchParams } from 'react-router-dom';
 
 const { DirectoryTree } = Tree;
-const items: MenuProps['items'] = [
-  {
-    key: '1',
-    label: (
-      <a onClick={event=>event.preventDefault()} target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-        编辑
-      </a>
-    ),
-  },
-  {
-    key: '2',
-    label: (
-      <a onClick={event=>event.preventDefault()} target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
-        添加菜单
-      </a>
-    ),
-  },
-  {
-    key: '3',
-    label: (
-      <a onClick={event=>event.preventDefault()} target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
-        复制
-      </a>
-    ),
-  },
-  {
-    key: '4',
-    label: (
-      <a onClick={event=>event.preventDefault()} target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
-        删除
-      </a>
-    ),
-  },
-];
 
-const treeData: any = [
-  {
-    title: (
-      <>
-        'parent 0'
-        <Dropdown
-          menu={{ items,onClick:event=>event.domEvent.stopPropagation() }}
-          trigger={['click']}
-          placement="bottomLeft"
-          arrow={{ pointAtCenter: true }}
+const SelfDropDown = ({id,listMenuTree,children}:any) => {
+  const confirm = async (e: React.MouseEvent<HTMLElement>) => {
+    if (id){
+      const res = await deleteMenu({id})
+      if (res?.code === 200){
+        message.success("删除成功")
+        listMenuTree()
+        return
+      }
+      message.error("删除失败")
+    }
+    console.log(e);
+    message.success('Click on Yes');
+  };
+
+  const cancel = (e: React.MouseEvent<HTMLElement>) => {
+    console.log(e);
+    message.error('Click on No');
+  };
+  const items: MenuProps['items'] = [
+    {
+      key: '1',
+      label: (
+        <a onClick={event=>event.preventDefault()} target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
+          编辑
+        </a>
+      ),
+    },
+    {
+      key: '2',
+      label: (
+        <a onClick={event=>event.preventDefault()} target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
+          添加菜单
+        </a>
+      ),
+    },
+    {
+      key: '3',
+      label: (
+        <a onClick={event=>event.preventDefault()} target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
+          复制
+        </a>
+      ),
+    },
+    {
+      key: '4',
+      label: (
+        <Popconfirm
+          title= {"Delete the" + id}
+          description="Are you sure to delete this task?"
+          onConfirm={confirm}
+          onCancel={cancel}
+          okText="Yes"
+          cancelText="No"
         >
-          <Button
-            onClick={(e) => e.stopPropagation()}
-            type="dashed"
-            size="small"
-            shape="circle"
-            icon={<EllipsisOutlined />}
-          />
-        </Dropdown>
-      </>
-    ),
-    key: '0-0',
-    children: [
-      {
-        title: (
-          <>
-            'leaf 0-0'
-            <Dropdown
-              menu={{ items }}
-              trigger={['click']}
-              placement="bottomLeft"
-              arrow={{ pointAtCenter: true }}
-            >
-              <Button
-                onClick={(e) => e.stopPropagation()}
-                type="dashed"
-                size="small"
-                shape="circle"
-                icon={<EllipsisOutlined />}
-              />
-            </Dropdown>
-          </>
-        ),
-        key: '0-0-0',
-        isLeaf: false,
-      },
-      { title: 'leaf 0-1', key: '0-0-1', isLeaf: false },
-    ],
-  },
-  {
-    title: 'parent 1',
-    key: '0-1',
-    children: [
-      { title: 'leaf 1-0', key: '0-1-0', isLeaf: true, icon: <FolderOutlined /> },
-      { title: 'leaf 1-1', key: '0-1-1', isLeaf: true },
-    ],
-  },
-];
+          <a onClick={event=>event.preventDefault()} target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
+            删除
+          </a>
+        </Popconfirm>
+
+      ),
+    },
+  ];
+
+  return (
+    <>
+      {children}
+      <Dropdown
+        menu={{ items,onClick:event=>event.domEvent.stopPropagation()}}
+        trigger={['click']}
+        placement="bottomLeft"
+        arrow={{ pointAtCenter: true }}
+      >
+        <Button
+          onClick={(e) => e.stopPropagation()}
+          type="dashed"
+          size="small"
+          shape="circle"
+          icon={<EllipsisOutlined />}
+        />
+      </Dropdown>
+    </>
+  );
+}
 
 const Index: React.FC = () => {
+
+  const [menuTreeData,setMenuTreeData] = useState<any>([])
   const params = useParams();
   const searchParams = useSearchParams();
   const location: any = useLocation();
+  const listMenuTree = () => {
+    getMenuTree().then(res=>{
+      console.log("res===>",res?.data)
+      if (!res?.data){return}
+      recursionGetTree(res?.data)
+      setMenuTreeData(res?.data)
+    })
+  }
+  const recursionGetTree = (menu:any) => {
+
+    for (let i = 0; i < menu.length; i++) {
+      let currentMenu = menu[i]
+      if (currentMenu.isLeaf){ // 目录
+        currentMenu.title = <SelfDropDown id={currentMenu.key} listMenuTree={listMenuTree}>{currentMenu.title}</SelfDropDown>;
+      }else{
+        currentMenu.title = <SelfDropDown id={currentMenu.key} listMenuTree={listMenuTree}>{currentMenu.title}</SelfDropDown>
+      }
+      if (menu[i].children){
+        recursionGetTree(menu[i].children)
+      }
+    }
+  }
   useEffect(() => {
     const id = location.state?.interfaceId;
     if (id) {
@@ -144,6 +159,7 @@ const Index: React.FC = () => {
         setCurrentInterface(res?.data);
       });
     }
+    listMenuTree()
     console.log('params=', params);
     console.log('searchParams', searchParams);
     console.log('location', location);
@@ -264,6 +280,16 @@ const Index: React.FC = () => {
     },
   ];
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  /**
+   * 接受子组件的请求参数
+   * @param acceptParams
+   */
   const acceptRequestParams = (acceptParams: []) => {
     setRequestParams(requestParams);
     let params = '';
@@ -274,11 +300,9 @@ const Index: React.FC = () => {
     setUrl(url + '?' + params);
   };
 
-  const code1 = "// your original code...";
-  const code2 = "// a different version...";
-  const options = {
-    //renderSideBySide: false
-  };
+  const cancelMenuModal = () => {
+    setIsModalOpen(false)
+  }
 
   return (
     <PageContainer
@@ -290,7 +314,7 @@ const Index: React.FC = () => {
       <Row>
         <Col span={4}>
           <Space.Compact>
-            <Button type="primary" shape="circle">
+            <Button type="primary" shape="circle" onClick={showModal}>
               <PlusOutlined />
             </Button>
             <Input
@@ -308,7 +332,7 @@ const Index: React.FC = () => {
             defaultExpandAll
             onSelect={onSelect}
             onExpand={onExpand}
-            treeData={treeData}
+            treeData={menuTreeData}
           />
         </Col>
 
@@ -387,10 +411,18 @@ const Index: React.FC = () => {
             ]}
           />
           <Divider children="Response" orientation="left" />
-
-          <JSONPretty json={baseResponse}></JSONPretty>
+          <Card>
+            <JSONPretty json={menuTreeData}></JSONPretty>
+            <JSONPretty json={baseResponse}></JSONPretty>
+          </Card>
         </Col>
       </Row>
+
+      <MenuModal
+        isModalOpen={isModalOpen}
+        cancelMenuModal={cancelMenuModal}
+        listMenuTree={listMenuTree}
+      />
 
       <DrawerInterface
         currentInterface={currentInterface}

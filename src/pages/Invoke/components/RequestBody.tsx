@@ -1,4 +1,4 @@
-import { Col, Radio, RadioChangeEvent, Row, Select } from 'antd';
+import {Col, Input, Radio, RadioChangeEvent, Result, Row, Select} from 'antd';
 import { useState } from 'react';
 import FormData from "@/pages/Invoke/components/FormData";
 
@@ -10,7 +10,7 @@ const RequestBody = () => {
   const [value, setValue] = useState('none');
   const onChange = (e: RadioChangeEvent) => {
     console.log('radio checked', e.target.value);
-    if (e.target.value === 4) {
+    if (e.target.value === 'raw') {
       setRaw(true);
     } else {
       setRaw(false);
@@ -56,10 +56,12 @@ const RequestBody = () => {
       </Row>
       <Row>
         <Col span={24}>
-          {value === 'none' && 'none'}
+          {value === 'none' && <Result
+            title="There are some problems with your operation."
+          />}
           {value === 'form-data' && <FormData/>}
-          {value === 'x-www-form-urlencoded' && 'x-www-form-urlencoded'}
-          {value === 'raw' && 'raw'}
+          {value === 'x-www-form-urlencoded' && <Input.TextArea rows={8}/>}
+          {value === 'raw' && <Input.TextArea rows={8}/>}
           {value === 'binary' && 'binary'}
           {value === 'GraphQL' && 'GraphQL'}
         </Col>

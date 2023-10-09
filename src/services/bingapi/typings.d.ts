@@ -7,6 +7,10 @@ declare namespace API {
     job: SysJob;
   };
 
+  type addMenuParams = {
+    title: string;
+  };
+
   type BaseResponseBoolean = {
     code?: number;
     data?: boolean;
@@ -79,6 +83,12 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponseListInvokeMenuVO = {
+    code?: number;
+    data?: InvokeMenuVO[];
+    message?: string;
+  };
+
   type BaseResponseListPicture = {
     code?: number;
     data?: Picture[];
@@ -134,6 +144,10 @@ declare namespace API {
 
   type deleteJobByIdParams = {
     job: SysJob;
+  };
+
+  type deleteMenuParams = {
+    id: number;
   };
 
   type DeleteRequest = {
@@ -252,6 +266,13 @@ declare namespace API {
     content?: ProList[];
   };
 
+  type InvokeMenuVO = {
+    title?: string;
+    key?: number;
+    parentId?: number;
+    isLeaf?: boolean;
+  };
+
   type InvokeRequest = {
     url?: string;
     method?: string;
@@ -264,51 +285,51 @@ declare namespace API {
   };
 
   type IPageDictData = {
-    total?: number;
-    pages?: number;
-    records?: DictData[];
-    current?: number;
     size?: number;
+    total?: number;
+    current?: number;
+    records?: DictData[];
+    pages?: number;
   };
 
   type IPageDictType = {
-    total?: number;
-    pages?: number;
-    records?: DictType[];
-    current?: number;
     size?: number;
+    total?: number;
+    current?: number;
+    records?: DictType[];
+    pages?: number;
   };
 
   type IPageInterfaceInfo = {
-    total?: number;
-    pages?: number;
-    records?: InterfaceInfo[];
-    current?: number;
     size?: number;
+    total?: number;
+    current?: number;
+    records?: InterfaceInfo[];
+    pages?: number;
   };
 
   type IPageSysConfig = {
-    total?: number;
-    pages?: number;
-    records?: SysConfig[];
-    current?: number;
     size?: number;
+    total?: number;
+    current?: number;
+    records?: SysConfig[];
+    pages?: number;
   };
 
   type IPageSysJob = {
-    total?: number;
-    pages?: number;
-    records?: SysJob[];
-    current?: number;
     size?: number;
+    total?: number;
+    current?: number;
+    records?: SysJob[];
+    pages?: number;
   };
 
   type IPageUserVO = {
-    total?: number;
-    pages?: number;
-    records?: UserVO[];
-    current?: number;
     size?: number;
+    total?: number;
+    current?: number;
+    records?: UserVO[];
+    pages?: number;
   };
 
   type listConfigParams = {

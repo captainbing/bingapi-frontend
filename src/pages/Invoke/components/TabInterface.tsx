@@ -4,7 +4,7 @@ import React, {forwardRef, useImperativeHandle, useRef, useState} from "react";
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
 const defaultPanes = new Array(2).fill(null).map((_, index) => {
-  const id = String(index + 1);
+  const id = String(index + 100);
   return { label: `Tab ${id}`, children: '', key: id };
 });
 
