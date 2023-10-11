@@ -11,6 +11,12 @@ declare namespace API {
     title: string;
   };
 
+  type BaseResponse = {
+    code?: number;
+    data?: Record<string, any>;
+    message?: string;
+  };
+
   type BaseResponseBoolean = {
     code?: number;
     data?: boolean;
@@ -147,7 +153,7 @@ declare namespace API {
   };
 
   type deleteMenuParams = {
-    id: number;
+    id: string;
   };
 
   type DeleteRequest = {
@@ -268,7 +274,7 @@ declare namespace API {
 
   type InvokeMenuVO = {
     title?: string;
-    key?: number;
+    key?: string;
     parentId?: number;
     isLeaf?: boolean;
   };
@@ -285,51 +291,51 @@ declare namespace API {
   };
 
   type IPageDictData = {
-    size?: number;
     total?: number;
+    pages?: number;
     current?: number;
     records?: DictData[];
-    pages?: number;
+    size?: number;
   };
 
   type IPageDictType = {
-    size?: number;
     total?: number;
+    pages?: number;
     current?: number;
     records?: DictType[];
-    pages?: number;
+    size?: number;
   };
 
   type IPageInterfaceInfo = {
-    size?: number;
     total?: number;
+    pages?: number;
     current?: number;
     records?: InterfaceInfo[];
-    pages?: number;
+    size?: number;
   };
 
   type IPageSysConfig = {
-    size?: number;
     total?: number;
+    pages?: number;
     current?: number;
     records?: SysConfig[];
-    pages?: number;
+    size?: number;
   };
 
   type IPageSysJob = {
-    size?: number;
     total?: number;
+    pages?: number;
     current?: number;
     records?: SysJob[];
-    pages?: number;
+    size?: number;
   };
 
   type IPageUserVO = {
-    size?: number;
     total?: number;
+    pages?: number;
     current?: number;
     records?: UserVO[];
-    pages?: number;
+    size?: number;
   };
 
   type listConfigParams = {
@@ -408,6 +414,10 @@ declare namespace API {
     size?: number;
   };
 
+  type selectMenuParams = {
+    id: string;
+  };
+
   type sendCaptchaParams = {
     userAccount: string;
   };
@@ -446,7 +456,7 @@ declare namespace API {
   };
 
   type User = {
-    id?: number;
+    id?: string;
     userAccount?: string;
     userPassword?: string;
     unionId?: string;
@@ -471,7 +481,7 @@ declare namespace API {
   };
 
   type UserVO = {
-    id?: number;
+    id?: string;
     userAccount?: string;
     unionId?: string;
     mpOpenId?: string;

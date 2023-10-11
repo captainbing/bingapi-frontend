@@ -136,7 +136,6 @@ const Index: React.FC = () => {
     })
   }
   const recursionGetTree = (menu:any) => {
-
     for (let i = 0; i < menu.length; i++) {
       let currentMenu = menu[i]
       if (currentMenu.isLeaf){ // 目录

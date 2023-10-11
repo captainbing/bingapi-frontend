@@ -48,3 +48,18 @@ export async function deleteMenu(
     ...(options || {}),
   });
 }
+
+/** 此处后端没有提供注释 GET /invoke/menu/select */
+export async function selectMenu(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.selectMenuParams,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponse>(SYS_URL + '/invoke/menu/select', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
