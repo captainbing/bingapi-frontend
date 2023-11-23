@@ -1,62 +1,116 @@
-import {addMenu, selectMenu} from "@/services/api/invoke";
-import {Dropdown, Form, Input, MenuProps, Modal, TreeSelect} from "antd";
-import React, {useEffect, useState} from "react";
-import {useModel} from "@umijs/max";
+import {addMenu, editMenu} from '@/services/api/invoke';
+import { Form, Input, message, Modal, TreeSelect } from 'antd';
+import { useImperativeHandle } from 'react';
+import {withRouter} from "@umijs/renderer-react";
 
-
-
-const onFinish = (values: any) => {
-  console.log('Success:', values);
-};
-
-const onFinishFailed = (errorInfo: any) => {
-  console.log('Failed:', errorInfo);
-};
-
-const MenuModal = ({isModalOpen,cancelMenuModal,listMenuTree}:any) => {
+const MenuModal = (props: any) => {
+  const { isModalOpen, cancelMenuModal, listMenuTree, isEdit, currentFloor, treeMenu } = props;
+  //用useImperativeHandle暴露一些外部ref能访问的属性
+  useImperativeHandle(props.onRef, () => {
+    return {
+      editSetting: editSetting,
+    };
+  });
 
   const [form] = Form.useForm();
   const handleOk = async () => {
-    const res = await addMenu(form.getFieldsValue(true))
-    if (res?.code === 200){
-      listMenuTree()
-      cancelMenuModal()
+    if (!isEdit) {
+      // 添加
+      const res = await addMenu({
+        ...form.getFieldsValue(true),
+        type: '0',
+      });
+      if (res?.code === 200) {
+        listMenuTree();
+        handelCancelMenuModal();
+      }
+    } else {
+      //修改
+      const res = await editMenu({
+        id: currentFloor?.key,
+        title: form.getFieldValue('title'),
+        parentId: form.getFieldValue('id'),
+      });
+      if (res?.code === 200) {
+        message.success('修改成功');
+        listMenuTree();
+        handelCancelMenuModal();
+        return;
+      }
+      message.error(res?.message);
     }
-  }
+  };
 
-  const [menuName,setMenuName] = useState("")
-  const [treeMenu,setTreeMenu] = useState([])
+  const editSetting = () => {
+    console.log('treeMenu', treeMenu);
+    const parentKey = recursionGetParent(treeMenu, currentFloor?.parentId);
+    const title = recursionGetTitle(treeMenu, currentFloor?.key);
+    form.setFieldValue('title', title);
+    if (parentKey) {
+      form.setFieldValue('id', parentKey);
+    } else {
+      form.setFieldValue('id', '0');
+    }
+  };
 
-  const { initialState } = useModel('@@initialState');
-
-  useEffect(()=>{
-    selectMenu({
-      id:initialState?.currentUser?.id
-    }).then(res=>{
-      setTreeMenu(res?.data)
-    })
-  },[])
+  /**
+   * 递归查找父级菜单Id
+   * @param treeMenu
+   * @param parentId
+   */
+  const recursionGetParent = (treeMenu, parentId): any => {
+    for (let i = 0; i < treeMenu.length; i++) {
+      if (treeMenu[i]?.key === parentId) {
+        return treeMenu[i]?.key;
+      }
+      if (treeMenu[i]?.children) {
+        const res = recursionGetParent(treeMenu[i]?.children, parentId);
+        if (res) {
+          return res;
+        }
+      }
+    }
+  };
+  /**
+   * 递归查找当前菜单名称
+   * @param treeMenu
+   * @param key
+   */
+  const recursionGetTitle = (treeMenu, key): any => {
+    for (let i = 0; i < treeMenu.length; i++) {
+      if (treeMenu[i]?.key === key) {
+        return treeMenu[i]?.title;
+      }
+      if (treeMenu[i]?.children) {
+        let res = recursionGetTitle(treeMenu[i]?.children, key);
+        if (res) {
+          return res;
+        }
+      }
+    }
+  };
 
   const handelCancelMenuModal = () => {
-    form.resetFields()
-    form.setFieldValue("title","")
-    cancelMenuModal()
-  }
-
-
+    form.resetFields();
+    cancelMenuModal();
+    // getSelectTree()
+  };
 
   return (
     <>
-      <Modal title="新建接口分组" open={isModalOpen} onOk={handleOk} onCancel={handelCancelMenuModal}>
+      <Modal
+        title={isEdit ? '编辑' : '新建接口分组'}
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handelCancelMenuModal}
+      >
         <Form
           form={form}
           name="basic"
           labelCol={{ span: 7 }}
           wrapperCol={{ span: 13 }}
           style={{ maxWidth: 600 }}
-          initialValues={{ title: '', parentId: '0' }}
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
+          initialValues={{ title: '', id: '0' }}
           autoComplete="off"
         >
           <Form.Item<any>
@@ -66,17 +120,13 @@ const MenuModal = ({isModalOpen,cancelMenuModal,listMenuTree}:any) => {
           >
             <Input />
           </Form.Item>
-          <Form.Item label="父级菜单" name="parentId">
-            <TreeSelect
-              treeData={treeMenu}
-            />
+          <Form.Item label="父级菜单" name="id">
+            <TreeSelect treeData={treeMenu} />
           </Form.Item>
-
         </Form>
       </Modal>
     </>
   );
+};
 
-}
-
-export default MenuModal
+export default withRouter(MenuModal)

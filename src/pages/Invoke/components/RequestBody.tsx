@@ -57,7 +57,7 @@ const RequestBody = () => {
       <Row>
         <Col span={24}>
           {value === 'none' && <Result
-            title="There are some problems with your operation."
+            title="请求体将不携带任何信息"
           />}
           {value === 'form-data' && <FormData/>}
           {value === 'x-www-form-urlencoded' && <Input.TextArea rows={8}/>}

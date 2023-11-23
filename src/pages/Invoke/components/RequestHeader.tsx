@@ -1,7 +1,11 @@
 import {Button, Form, FormInstance, Input, InputRef, Popconfirm, Table} from "antd";
 import React, {useContext, useEffect, useRef, useState} from "react";
+import {nanoid} from "nanoid";
 
-const RequestHeader = () => {
+const RequestHeader = (props:any) => {
+
+
+  const {acceptRequestHeader,requestHeader,handleDeleteRequestHeader} = props
 
   type EditableTableProps = Parameters<typeof Table>[0];
   type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>;
@@ -28,8 +32,8 @@ const RequestHeader = () => {
       dataIndex: 'operation',
       // @ts-ignore
       render: (_, record: { key: React.Key }) =>
-        dataSource.length >= 1 ? (
-          <Popconfirm title="Sure to delete?" onConfirm={() => handleDelete(record.key)}>
+        requestHeader.length >= 1 ? (
+          <Popconfirm title="Sure to delete?" onConfirm={() => handleDelete(record?.key)}>
             <a>Delete</a>
           </Popconfirm>
         ) : null,
@@ -44,12 +48,13 @@ const RequestHeader = () => {
       ...item,
       ...row,
     });
-    setDataSource(newData);
+    acceptRequestHeader(newData)
   };
 
   const handleDelete = (key: React.Key) => {
-    const newData = dataSource.filter((item) => item.key !== key);
-    setDataSource(newData);
+    handleDeleteRequestHeader(key)
+    // const newData = dataSource.filter((item) => item.key !== key);
+    // setDataSource(newData);
   };
 
   const paramsColumn = paramColumn.map((col) => {
@@ -165,7 +170,6 @@ const RequestHeader = () => {
       cell: EditableCell,
     },
   };
-  const [requestParams, setRequestParams] = useState({});
 
   // @ts-ignore
   const onSelectParam = (record, selected, selectedRows, nativeEvent) => {
@@ -175,7 +179,6 @@ const RequestHeader = () => {
       // @ts-ignore
       requestParam[key] = selectedRows[index].requestValue;
     }
-    setRequestParams(requestParam);
   };
   // @ts-ignore
   const onSelectAllParams = (selected, selectedRows, changeRow) => {
@@ -202,7 +205,6 @@ const RequestHeader = () => {
       description: 'London, Park Lane no. 1',
     },
   ]);
-  const [requestHeaders, setRequestHeaders] = useState({});
   const [selectedHeaderRowKeys, setSelectedHeaderRowKeys] = useState<React.Key[]>(['0','1','2']);
   const onSelectChange = (newSelectedRowKeys: React.Key[],selectedRows: any) => {
     let requestHeader = {};
@@ -211,7 +213,6 @@ const RequestHeader = () => {
       // @ts-ignore
       requestHeader[key] = selectedRows[index].requestValue;
     }
-    setRequestHeaders(requestHeader);
     console.log('selectedRowKeys changed: ', newSelectedRowKeys);
     setSelectedHeaderRowKeys(newSelectedRowKeys);
   };
@@ -230,16 +231,14 @@ const RequestHeader = () => {
     description: string;
   }
 
-  const [count, setCount] = useState(3);
   const handleAdd = () => {
     const newData: DataType = {
-      key: count,
-      requestKey: `Edward King ${count}`,
+      key: nanoid(),
+      requestKey: `Edward King`,
       requestValue: '32',
-      description: `London, Park Lane no. ${count}`,
+      description: `London, Park Lane no.`,
     };
-    setDataSource([...dataSource, newData]);
-    setCount(count + 1);
+    acceptRequestHeader([...requestHeader,newData])
   };
 
   return (
@@ -253,7 +252,7 @@ const RequestHeader = () => {
         components={components}
         rowClassName={() => 'editable-row'}
         bordered
-        dataSource={dataSource}
+        dataSource={requestHeader}
         columns={paramsColumn as ColumnTypes}
         pagination={false}
       />

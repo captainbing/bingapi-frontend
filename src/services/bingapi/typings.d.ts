@@ -7,16 +7,6 @@ declare namespace API {
     job: SysJob;
   };
 
-  type addMenuParams = {
-    title: string;
-  };
-
-  type BaseResponse = {
-    code?: number;
-    data?: Record<string, any>;
-    message?: string;
-  };
-
   type BaseResponseBoolean = {
     code?: number;
     data?: boolean;
@@ -38,6 +28,12 @@ declare namespace API {
   type BaseResponseInterfaceInfo = {
     code?: number;
     data?: InterfaceInfo;
+    message?: string;
+  };
+
+  type BaseResponseInvokeRecordVO = {
+    code?: number;
+    data?: InvokeRecordVO;
     message?: string;
   };
 
@@ -216,6 +212,10 @@ declare namespace API {
     id: number;
   };
 
+  type getInvokeRecordByIdParams = {
+    id?: string;
+  };
+
   type getJobByIdParams = {
     job: SysJob;
   };
@@ -274,9 +274,62 @@ declare namespace API {
 
   type InvokeMenuVO = {
     title?: string;
+    value?: string;
     key?: string;
-    parentId?: number;
+    parentId?: string;
     isLeaf?: boolean;
+  };
+
+  type InvokeRecord = {
+    id?: string;
+    parentId?: string;
+    userId?: string;
+    url?: string;
+    type?: string;
+    requestParam?: string;
+    requestHeader?: string;
+    requestBody?: string;
+    responseHeader?: string;
+    responseBody?: string;
+    createBy?: string;
+    createTime?: string;
+    updateBy?: string;
+    updateTime?: string;
+    remark?: string;
+    title?: string;
+  };
+
+  type InvokeRecordRequest = {
+    title?: string;
+    parentId?: string;
+    url?: string;
+    requestMethod?: string;
+    requestParam?: RequestField[];
+    requestHeader?: RequestField[];
+    requestBody?: string;
+    responseHeader?: RequestField[];
+    responseBody?: string;
+  };
+
+  type InvokeRecordVO = {
+    id?: string;
+    parentId?: string;
+    userId?: string;
+    url?: string;
+    type?: string;
+    requestParam?: string;
+    requestHeader?: string;
+    requestBody?: string;
+    responseHeader?: string;
+    responseBody?: string;
+    createBy?: string;
+    createTime?: string;
+    updateBy?: string;
+    updateTime?: string;
+    remark?: string;
+    title?: string;
+    requestParams?: RequestField[];
+    requestHeaders?: RequestField[];
   };
 
   type InvokeRequest = {
@@ -291,51 +344,51 @@ declare namespace API {
   };
 
   type IPageDictData = {
+    size?: number;
     total?: number;
-    pages?: number;
     current?: number;
     records?: DictData[];
-    size?: number;
+    pages?: number;
   };
 
   type IPageDictType = {
+    size?: number;
     total?: number;
-    pages?: number;
     current?: number;
     records?: DictType[];
-    size?: number;
+    pages?: number;
   };
 
   type IPageInterfaceInfo = {
+    size?: number;
     total?: number;
-    pages?: number;
     current?: number;
     records?: InterfaceInfo[];
-    size?: number;
+    pages?: number;
   };
 
   type IPageSysConfig = {
+    size?: number;
     total?: number;
-    pages?: number;
     current?: number;
     records?: SysConfig[];
-    size?: number;
+    pages?: number;
   };
 
   type IPageSysJob = {
+    size?: number;
     total?: number;
-    pages?: number;
     current?: number;
     records?: SysJob[];
-    size?: number;
+    pages?: number;
   };
 
   type IPageUserVO = {
+    size?: number;
     total?: number;
-    pages?: number;
     current?: number;
     records?: UserVO[];
-    size?: number;
+    pages?: number;
   };
 
   type listConfigParams = {
@@ -394,6 +447,12 @@ declare namespace API {
     size?: string;
   };
 
+  type RequestField = {
+    key?: string;
+    value?: string;
+    description?: string;
+  };
+
   type SearchInterfaceRequest = {
     name?: string;
     status?: string;
@@ -448,11 +507,6 @@ declare namespace API {
     updateBy?: string;
     updateTime?: string;
     remark?: string;
-  };
-
-  type TestPost = {
-    key1?: string;
-    key2?: string;
   };
 
   type User = {

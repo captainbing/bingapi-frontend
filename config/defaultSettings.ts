@@ -1,8 +1,9 @@
-
-
 /**
  * @name
  */
+import {ProLayoutProps} from "@ant-design/pro-layout";
+
+
 const Settings: ProLayoutProps & {
   pwa?: boolean;
   logo?: string;
@@ -15,7 +16,7 @@ const Settings: ProLayoutProps & {
   fixedHeader: false,
   fixSiderbar: true,
   colorWeak: false,
-  title: '面向接口设计',
+  title: 'Postwoman',
   pwa: true,
   // logo: 'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
   logo: 'https://cdn.jsdelivr.net/gh/captainbing/blogimage@main/img/Anchor.svg',

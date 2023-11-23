@@ -132,8 +132,8 @@ const Login: React.FC = () => {
             maxWidth: '75vw',
           }}
           logo={<img alt="logo" src="/logo.svg" />}
-          title="OOI 系统"
-          subTitle={'OOI系统 管理接口像面向对象一样简单！！！'}
+          title="Postwoman"
+          subTitle={'一站式满足你对接口的需求！！！'}
           initialValues={{
             autoLogin: true,
           }}

@@ -1,8 +1,8 @@
 import { Button, Form, FormInstance, Input, InputRef, Popconfirm, Table } from 'antd';
+import { nanoid } from 'nanoid';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import JSONPretty from "react-json-pretty";
 
-const RequestParam = ({acceptRequestParams}:any) => {
+const RequestParam = ({ acceptRequestParams, requestParam, handleDeleteRequestParam }: any) => {
   type EditableTableProps = Parameters<typeof Table>[0];
   type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>;
   const paramColumn: (ColumnTypes[number] & { editable?: boolean; dataIndex: string })[] = [
@@ -28,7 +28,7 @@ const RequestParam = ({acceptRequestParams}:any) => {
       dataIndex: 'operation',
       // @ts-ignore
       render: (_, record: { key: React.Key }) =>
-        dataSource.length >= 1 ? (
+        requestParam.length >= 1 ? (
           <Popconfirm title="Sure to delete?" onConfirm={() => handleDelete(record.key)}>
             <a>Delete</a>
           </Popconfirm>
@@ -36,24 +36,23 @@ const RequestParam = ({acceptRequestParams}:any) => {
     },
   ];
 
-  const [requestParams, setRequestParams] = useState({});
 
   const handleSave = (row: DataType) => {
-    const newData = [...dataSource];
+    const newData = [...requestParam];
     const index = newData.findIndex((item) => row.key === item.key);
     const item = newData[index];
     newData.splice(index, 1, {
       ...item,
       ...row,
     });
-    console.log("res======>>>",newData)
-    acceptRequestParams(newData)
-    setDataSource(newData);
+    acceptRequestParams(newData);
   };
 
   const handleDelete = (key: React.Key) => {
-    const newData = dataSource.filter((item) => item.key !== key);
-    setDataSource(newData);
+    handleDeleteRequestParam(key)
+
+    // const newData = dataSource.filter((item) => item.key !== key);
+    // setDataSource(newData);
   };
 
   const paramsColumn = paramColumn.map((col) => {
@@ -132,7 +131,6 @@ const RequestParam = ({acceptRequestParams}:any) => {
         const values = await form.validateFields();
         toggleEdit();
         handleSave({ ...record, ...values });
-
       } catch (errInfo) {
         console.log('Save failed:', errInfo);
       }
@@ -177,7 +175,6 @@ const RequestParam = ({acceptRequestParams}:any) => {
       // @ts-ignore
       requestParam[key] = selectedRows[index].requestValue;
     }
-    setRequestParams(requestParam);
   };
   // @ts-ignore
   const onSelectAllParams = (selected, selectedRows, changeRow) => {
@@ -199,14 +196,13 @@ const RequestParam = ({acceptRequestParams}:any) => {
       description: 'London, Park Lane no. 1',
     },
   ]);
-  const onSelectChange = (newSelectedRowKeys: React.Key[],selectedRows: any) => {
+  const onSelectChange = (newSelectedRowKeys: React.Key[], selectedRows: any) => {
     let requestParam = {};
     for (let index in selectedRows) {
       let key = selectedRows[index].requestKey as any;
       // @ts-ignore
       requestParam[key] = selectedRows[index].requestValue;
     }
-    setRequestParams(requestParam);
     console.log('selectedRowKeys changed: ', newSelectedRowKeys);
     setSelectedParamRowKeys(newSelectedRowKeys);
   };
@@ -214,7 +210,7 @@ const RequestParam = ({acceptRequestParams}:any) => {
     selections: false,
     selectedParamRowKeys,
     onSelect: onSelectParam,
-    onChange:onSelectChange,
+    onChange: onSelectChange,
     onSelectAll: onSelectAllParams,
   };
 
@@ -225,16 +221,14 @@ const RequestParam = ({acceptRequestParams}:any) => {
     description: string;
   }
 
-  const [count, setCount] = useState(2);
   const handleAdd = () => {
     const newData: DataType = {
-      key: count,
-      requestKey: `Edward King ${count}`,
+      key: nanoid(),
+      requestKey: `Edward King`,
       requestValue: '32',
-      description: `London, Park Lane no. ${count}`,
+      description: `London, Park Lane no.`,
     };
-    setDataSource([...dataSource, newData]);
-    setCount(count + 1);
+    acceptRequestParams([...requestParam, newData]);
   };
 
   return (
@@ -249,7 +243,7 @@ const RequestParam = ({acceptRequestParams}:any) => {
         components={components}
         rowClassName={() => 'editable-row'}
         bordered
-        dataSource={dataSource}
+        dataSource={requestParam}
         columns={paramsColumn as ColumnTypes}
         pagination={false}
       />

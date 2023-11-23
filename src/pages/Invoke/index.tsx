@@ -10,14 +10,14 @@ import {
   Button, Card,
   Col,
   Divider,
-  Dropdown, Input,
+  Dropdown, Form, Input,
   MenuProps,
-  message, Popconfirm, Row,
+  message, Modal, Popconfirm, Row,
   Select,
   Space,
   Tabs,
   Tag, Tooltip,
-  Tree
+  Tree, TreeSelect
 } from 'antd';
 
 import DrawerInterface from '@/pages/Invoke/components/DrawerInterface';
@@ -27,124 +27,67 @@ import RequestHeader from '@/pages/Invoke/components/RequestHeader';
 import RequestParam from '@/pages/Invoke/components/RequestParam';
 import TabInterface from '@/pages/Invoke/components/TabInterface';
 import { getInterfaceById } from '@/services/api/interface';
-import {deleteMenu, getMenuTree, invokeInterface} from '@/services/api/invoke';
+import {
+  addInterfaceRecord,
+  deleteMenu,
+  getInvokeRecordById,
+  getMenuTree,
+  invokeInterface,
+  selectMenu
+} from '@/services/api/invoke';
 import { DirectoryTreeProps } from 'antd/es/tree';
 import React,{ useEffect,useRef,useState } from 'react';
 import JSONPretty from 'react-json-pretty';
 import { useLocation,useParams } from 'react-router';
 import { useSearchParams } from 'react-router-dom';
+import {useModel} from "@umijs/max";
+import SelfDropDown from "@/pages/Invoke/components/SelfDropDown";
 
 const { DirectoryTree } = Tree;
 
-const SelfDropDown = ({id,listMenuTree,children}:any) => {
-  const confirm = async (e: React.MouseEvent<HTMLElement>) => {
-    if (id){
-      const res = await deleteMenu({id})
-      if (res?.code === 200){
-        message.success("删除成功")
-        listMenuTree()
-        return
-      }
-      message.error("删除失败")
-    }
-    console.log(e);
-    message.success('Click on Yes');
-  };
-
-  const cancel = (e: React.MouseEvent<HTMLElement>) => {
-    console.log(e);
-    message.error('Click on No');
-  };
-  const items: MenuProps['items'] = [
-    {
-      key: '1',
-      label: (
-        <a onClick={event=>event.preventDefault()} target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-          编辑
-        </a>
-      ),
-    },
-    {
-      key: '2',
-      label: (
-        <a onClick={event=>event.preventDefault()} target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
-          添加菜单
-        </a>
-      ),
-    },
-    {
-      key: '3',
-      label: (
-        <a onClick={event=>event.preventDefault()} target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
-          复制
-        </a>
-      ),
-    },
-    {
-      key: '4',
-      label: (
-        <Popconfirm
-          title= {"Delete the" + id}
-          description="Are you sure to delete this task?"
-          onConfirm={confirm}
-          onCancel={cancel}
-          okText="Yes"
-          cancelText="No"
-        >
-          <a onClick={event=>event.preventDefault()} target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
-            删除
-          </a>
-        </Popconfirm>
-
-      ),
-    },
-  ];
-
-  return (
-    <>
-      {children}
-      <Dropdown
-        menu={{ items,onClick:event=>event.domEvent.stopPropagation()}}
-        trigger={['click']}
-        placement="bottomLeft"
-        arrow={{ pointAtCenter: true }}
-      >
-        <Button
-          onClick={(e) => e.stopPropagation()}
-          type="dashed"
-          size="small"
-          shape="circle"
-          icon={<EllipsisOutlined />}
-        />
-      </Dropdown>
-    </>
-  );
-}
-
 const Index: React.FC = () => {
 
+  const { initialState } = useModel('@@initialState');
   const [menuTreeData,setMenuTreeData] = useState<any>([])
   const params = useParams();
   const searchParams = useSearchParams();
   const location: any = useLocation();
+  const [treeMenu,setTreeMenu] = useState([])
   const listMenuTree = () => {
-    getMenuTree().then(res=>{
-      console.log("res===>",res?.data)
-      if (!res?.data){return}
-      recursionGetTree(res?.data)
-      setMenuTreeData(res?.data)
+    selectMenu({
+      id:initialState?.currentUser?.id
+    }).then(result=>{
+      setTreeMenu(result?.data)
+      getMenuTree().then(res=>{
+        console.log("res===>",res?.data)
+        recursionGetTree(res?.data,result?.data)
+        setMenuTreeData(res?.data)
+      })
     })
   }
-  const recursionGetTree = (menu:any) => {
-    for (let i = 0; i < menu.length; i++) {
-      let currentMenu = menu[i]
-      if (currentMenu.isLeaf){ // 目录
-        currentMenu.title = <SelfDropDown id={currentMenu.key} listMenuTree={listMenuTree}>{currentMenu.title}</SelfDropDown>;
-      }else{
-        currentMenu.title = <SelfDropDown id={currentMenu.key} listMenuTree={listMenuTree}>{currentMenu.title}</SelfDropDown>
-      }
-      if (menu[i].children){
-        recursionGetTree(menu[i].children)
+
+  /**
+   * 生成树形结构
+   * @param menu
+   */
+  const recursionGetTree = (menu:any,treeMenuData:any) => {
+    if (menu?.length){
+      for (let i = 0; i < menu.length; i++) {
+        let currentMenu = menu[i]
+        const temp = {
+          key:currentMenu?.key,
+          title:currentMenu?.title,
+          parentId:currentMenu?.parentId,
+          isLeaf:currentMenu?.isLeaf
+        }
+        if (currentMenu.isLeaf){ // 文件
+          currentMenu.title = <SelfDropDown currentFloor={temp} treeMenu={treeMenuData} listMenuTree={listMenuTree} isMenu={false}/>;
+        }else{
+          currentMenu.title = <SelfDropDown currentFloor={temp} treeMenu={treeMenuData} listMenuTree={listMenuTree} isMenu={true}/>;
+        }
+        if (menu[i].children){
+          recursionGetTree(menu[i].children,treeMenuData)
+        }
       }
     }
   }
@@ -158,6 +101,7 @@ const Index: React.FC = () => {
         setCurrentInterface(res?.data);
       });
     }
+
     listMenuTree()
     console.log('params=', params);
     console.log('searchParams', searchParams);
@@ -166,6 +110,25 @@ const Index: React.FC = () => {
 
   /*** 当前需要调试的接口*/
   const [currentInterface, setCurrentInterface] = useState({});
+  /**
+   * 请求相关信息
+   */
+  const [invokeRecord,setInvokeRecord] = useState({
+    requestUrl:"",
+    requestMethod:"GET",
+    requestParam:[],
+    requestHeader:[],
+    requestBody:"{}",
+    responseHeader:[{
+      key:"0",
+      requestKey:"",
+      requestValue:"",
+      description:""
+    }],
+    responseBody:"{}"
+  })
+
+
   /*** 控制抽屉 */
   const [drawerOpen, setDrawerOpen] = useState(false);
   const showDrawer = () => {
@@ -174,33 +137,34 @@ const Index: React.FC = () => {
   const onCloseDrawer = () => {
     setDrawerOpen(false);
   };
-  const [url, setUrl] = useState('');
-  const [requestMethod, setRequestMethod] = useState('GET');
-  const [requestParams, setRequestParams] = useState({});
-  const [requestHeaders, setRequestHeaders] = useState({});
-  const [responseHeader, setResponseHeader] = useState({});
-  const [requestBody, setRequestBody] = useState('');
-  const [responseBody, setResponseBody] = useState({});
-  const [baseResponse, setBaseResponse] = useState([]);
-  const onAutoChange = (data: string) => {
-    setUrl(data);
+
+  const onAutoChange = (requestUrl: string) => {
+    setInvokeRecord({
+      ...invokeRecord,
+      requestUrl
+    });
   };
+  /**
+   * 接口调用
+   */
   const invokeAnotherInterface = async () => {
-    if (url === '') {
+    if (invokeRecord?.url === '') {
       message.warning('url是必填项');
       return;
     }
     const res = await invokeInterface({
-      url: url,
-      method: requestMethod,
-      requestParams,
-      requestHeaders,
-      requestBody,
+      url: invokeRecord?.url,
+      method: invokeRecord.requestMethod,
+      requestParams:invokeRecord.requestParam,
+      requestHeaders:invokeRecord.requestHeader,
+      requestBody: invokeRecord.requestBody,
     });
-    console.log(res);
     if (res?.code === 200) {
       // @ts-ignore
-      setBaseResponse(JSON.parse(res?.data?.baseResponse));
+      setInvokeRecord({
+        ...invokeRecord,
+        responseBody: res?.data?.responseBody
+      });
       return;
     }
     message.error(res?.message);
@@ -209,7 +173,10 @@ const Index: React.FC = () => {
    * 切换请求方法
    */
   const changeRequestMethod = (method: string) => {
-    setRequestMethod(method);
+    setInvokeRecord({
+      ...invokeRecord,
+      requestMethod: method
+    });
   };
   /**
    * 切换tab的回调函数
@@ -218,9 +185,18 @@ const Index: React.FC = () => {
   const tabRef = useRef();
 
   const onSelect: DirectoryTreeProps['onSelect'] = (keys, info) => {
+    if (!info.node.isLeaf) {
+      // 类型为目录
+      return;
+    }
     // @ts-ignore
     tabRef.current && tabRef.current.test(info.node.key, info.node.title, info.node.isLeaf);
-
+    // todo 获取当前接口 调用信息
+    getInvokeRecordById({
+      id:info.node.key as string
+    }).then(res=>{
+      setInvokeRecord(res?.data)
+    })
     console.log('Trigger Select', keys, info);
   };
 
@@ -228,6 +204,9 @@ const Index: React.FC = () => {
     console.log('Trigger Expand', keys, info);
   };
 
+  /**
+   * 请求选项 todo做成配置式
+   */
   const requestMethodOptions = [
     {
       value: 'GET',
@@ -281,7 +260,9 @@ const Index: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const menuModal = useRef()
   const showModal = () => {
+    menuModal.current?.editSetting()
     setIsModalOpen(true);
   };
 
@@ -289,20 +270,73 @@ const Index: React.FC = () => {
    * 接受子组件的请求参数
    * @param acceptParams
    */
-  const acceptRequestParams = (acceptParams: []) => {
-    setRequestParams(requestParams);
-    let params = '';
-    acceptParams.forEach((param) => {
-      params = params + param['requestKey'] + '=' + param['requestValue'] + '&';
-    });
-    params = params.substring(0, params.lastIndexOf('&'));
-    setUrl(url + '?' + params);
+  const acceptRequestParams = (acceptParams: any) => {
+    setInvokeRecord({
+      ...invokeRecord,
+      requestParam: acceptParams
+    })
   };
+
+  const acceptRequestHeader = (acceptHeaders:any)=>{
+    setInvokeRecord({
+      ...invokeRecord,
+      requestHeader: acceptHeaders
+    })
+  }
 
   const cancelMenuModal = () => {
     setIsModalOpen(false)
   }
 
+  /**
+   * 保存记录
+   */
+  const [form] = Form.useForm();
+  const [saveModalOpen,setSaveModalOpen] = useState(false)
+
+  const handelCancelMenuModal = () => {
+    setSaveModalOpen(false)
+  }
+
+  const handleSaveRecord = async () => {
+    const data = {
+      ...invokeRecord,
+      ...form.getFieldsValue(),
+    }
+    const res = await addInterfaceRecord(data)
+    if (res?.code === 200){
+      message.success("保存成功")
+      listMenuTree()
+      setSaveModalOpen(false)
+      form.resetFields()
+      return
+    }
+    message.error(res?.message)
+  }
+
+  /**
+   * 删除请求参数当前行
+   * @param key
+   */
+  const handleDeleteRequestParam = (key) => {
+    const newData = invokeRecord.requestParam.filter((item) => item.key !== key);
+    setInvokeRecord({
+      ...invokeRecord,
+      requestParam: newData
+    });
+  }
+
+  /**
+    * 删除请求头当前行
+    * @param key
+    */
+  const handleDeleteRequestHeader = (key) => {
+    const newData = invokeRecord?.requestHeader.filter((item) => item.key !== key);
+    setInvokeRecord({
+      ...invokeRecord,
+      requestHeader: newData
+    });
+  }
   return (
     <PageContainer
       header={{
@@ -312,10 +346,7 @@ const Index: React.FC = () => {
     >
       <Row>
         <Col span={4}>
-          <Space.Compact>
-            <Button type="primary" shape="circle" onClick={showModal}>
-              <PlusOutlined />
-            </Button>
+          <Space>
             <Input
               placeholder=""
               prefix={<SearchOutlined className="site-form-item-icon" />}
@@ -325,8 +356,13 @@ const Index: React.FC = () => {
                 </Tooltip>
               }
             />
-          </Space.Compact>
+            <Button type="primary" shape="default" onClick={showModal}>
+              <PlusOutlined />
+            </Button>
+          </Space>
+
           <DirectoryTree
+            expandAction='doubleClick'
             multiple
             defaultExpandAll
             onSelect={onSelect}
@@ -342,7 +378,7 @@ const Index: React.FC = () => {
               <Space.Compact block={true}>
                 <Select
                   size="large"
-                  value={requestMethod}
+                  value={invokeRecord?.requestMethod}
                   style={{ width: '15%' }}
                   onSelect={changeRequestMethod}
                   options={requestMethodOptions}
@@ -353,22 +389,21 @@ const Index: React.FC = () => {
                   size="large"
                   style={{ width: '90%' }}
                   placeholder="URL"
-                  value={url}
+                  value={invokeRecord?.requestUrl}
                   options={[
                     { value: 'http://localhost:9527/sys/interface/listInterfaces?id=11' },
                     { value: 'http://localhost:9527/sys/invoke/post' },
                     { value: 'https://q.qlogo.cn/g?b=qq&nk=750321038&s=640' },
-                    {
-                      value: 'http://q.qlogo.cn/headimg_dl?dst_uin=750321038&spec=640&img_type=jpg',
-                    },
+                    {value: 'http://q.qlogo.cn/headimg_dl?dst_uin=750321038&spec=640&img_type=jpg',},
                     { value: 'http://localhost:9527/sys/invoke/qq?qq=750321038' },
+                    { value: 'http://localhost:9527/sys/invoke/post' },
                   ]}
                 />
                 <Button type="primary" size="large" onClick={invokeAnotherInterface}>
                   Send
                 </Button>
-                <Button type="primary" size="large" onClick={showDrawer}>
-                  open
+                <Button type="primary" size="large" onClick={()=>setSaveModalOpen(true)}>
+                  保存
                 </Button>
               </Space.Compact>
             </Col>
@@ -381,21 +416,26 @@ const Index: React.FC = () => {
                 label: (
                   <span>
                     <AppleOutlined />
-                    Params
+                    Param
                   </span>
                 ),
                 key: 'params',
-                children: <RequestParam acceptRequestParams={acceptRequestParams} />,
+                children: <RequestParam requestParam={invokeRecord?.requestParam}
+                                        acceptRequestParams={acceptRequestParams}
+                                        handleDeleteRequestParam={handleDeleteRequestParam}
+                />,
               },
               {
                 label: (
                   <span>
                     <AndroidOutlined />
-                    Headers
+                    Header
                   </span>
                 ),
                 key: 'headers',
-                children: <RequestHeader />,
+                children: <RequestHeader acceptRequestHeader={acceptRequestHeader}
+                                         requestHeader={invokeRecord?.requestHeader}
+                                         handleDeleteRequestHeader={handleDeleteRequestHeader}/>,
               },
               {
                 label: (
@@ -411,8 +451,8 @@ const Index: React.FC = () => {
           />
           <Divider children="Response" orientation="left" />
           <Card>
-            <JSONPretty json={menuTreeData}></JSONPretty>
-            <JSONPretty json={baseResponse}></JSONPretty>
+            <JSONPretty json={invokeRecord?.responseBody}></JSONPretty>
+            {/*<JSONPretty json={interfaceInfo?.responseBody}></JSONPretty>*/}
           </Card>
         </Col>
       </Row>
@@ -420,7 +460,10 @@ const Index: React.FC = () => {
       <MenuModal
         isModalOpen={isModalOpen}
         cancelMenuModal={cancelMenuModal}
+        isEdit={false}
+        onRef={menuModal}
         listMenuTree={listMenuTree}
+        treeMenu={treeMenu}
       />
 
       <DrawerInterface
@@ -428,6 +471,36 @@ const Index: React.FC = () => {
         drawerOpen={drawerOpen}
         onCloseDrawer={onCloseDrawer}
       />
+      {/*保存接口*/}
+      <>
+        <Modal
+          title='保存'
+          open={saveModalOpen}
+          onOk={handleSaveRecord}
+          onCancel={handelCancelMenuModal}
+        >
+          <Form
+            form={form}
+            name="basic"
+            labelCol={{ span: 7 }}
+            wrapperCol={{ span: 13 }}
+            style={{ maxWidth: 600 }}
+            initialValues={{ title: '', parentId: '0' }}
+            autoComplete="off"
+          >
+            <Form.Item<any>
+              label="名称"
+              name="title"
+              rules={[{ required: true, message: 'Please input your title!' }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item label="父级菜单" name="parentId">
+              <TreeSelect treeData={treeMenu} />
+            </Form.Item>
+          </Form>
+        </Modal>
+      </>
     </PageContainer>
   );
 };

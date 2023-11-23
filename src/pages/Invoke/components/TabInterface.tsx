@@ -1,5 +1,6 @@
-import {Button, message, Tabs} from "antd";
+import {Button, Dropdown, MenuProps, message, Tabs} from "antd";
 import React, {forwardRef, useImperativeHandle, useRef, useState} from "react";
+import {UserOutlined} from "@ant-design/icons";
 
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
@@ -59,6 +60,47 @@ const TabInterface = forwardRef(({}, ref: any) => {
       remove(targetKey);
     }
   };
+
+  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    message.info('Click on left button.');
+    console.log('click left button', e);
+  };
+
+  const handleMenuClick: MenuProps['onClick'] = (e) => {
+    message.info('Click on menu item.');
+    console.log('click', e);
+  };
+
+  const items1: MenuProps['items'] = [
+    {
+      label: '1st menu item',
+      key: '1',
+      icon: <UserOutlined />,
+    },
+    {
+      label: '2nd menu item',
+      key: '2',
+      icon: <UserOutlined />,
+    },
+    {
+      label: '3rd menu item',
+      key: '3',
+      icon: <UserOutlined />,
+      danger: true,
+    },
+    {
+      label: '4rd menu item',
+      key: '4',
+      icon: <UserOutlined />,
+      danger: true,
+      disabled: true,
+    },
+  ];
+
+  const menuProps = {
+    items:items1,
+    onClick: handleMenuClick,
+  };
   return (
     <>
       {/*<div style={{ marginBottom: 16 }}>*/}
@@ -67,7 +109,10 @@ const TabInterface = forwardRef(({}, ref: any) => {
       <Tabs
         onChange={onChange}
         activeKey={activeKey}
-        tabBarExtraContent={<Button>Extra Action</Button>}
+        tabBarExtraContent={
+        <Dropdown.Button menu={menuProps} onClick={handleButtonClick}>
+          接口文档
+        </Dropdown.Button>}
         type="editable-card"
         onEdit={onEdit}
         items={items}
