@@ -1,10 +1,10 @@
 import React, {useRef, useState} from "react";
-import {deleteMenu} from "@/services/api/invoke";
+import {copyInvokeRecordById, deleteMenu} from "@/services/api/invoke";
 import {Button, Dropdown, MenuProps, message, Popconfirm, Tooltip} from "antd";
 import {EllipsisOutlined, PlusOutlined} from "@ant-design/icons";
 import MenuModal from "@/pages/Invoke/components/MenuModal";
 
-const SelfDropDown = ({currentFloor,isMenu,listMenuTree,treeMenu}:any) => {
+const SelfDropDown = ({currentFloor,isMenu,listMenuTree,treeMenu,sourceRecordTree}:any) => {
   const confirm = async (e: React.MouseEvent<HTMLElement>) => {
     if (currentFloor?.key){
       const res = await deleteMenu({id:currentFloor?.key})
@@ -32,6 +32,23 @@ const SelfDropDown = ({currentFloor,isMenu,listMenuTree,treeMenu}:any) => {
     menuModal.current?.editSetting()
     setIsModalOpen(true)
   };
+
+  /**
+   * 复制记录
+   * @param event
+   */
+  const copyInvokeRecord = async (event:React.MouseEvent) => {
+    event.stopPropagation()
+    event.preventDefault()
+    const res = await copyInvokeRecordById({id:currentFloor?.key})
+    if (res?.code === 200){
+      listMenuTree()
+      message.success("复制成功")
+      return
+    }
+    message.error(res?.message)
+  }
+
   const items: MenuProps['items'] = [
     {
       key: '1',
@@ -65,7 +82,7 @@ const SelfDropDown = ({currentFloor,isMenu,listMenuTree,treeMenu}:any) => {
       key: '3',
       label: (
         <a
-          onClick={(event) => event.preventDefault()}
+          onClick={(event) => copyInvokeRecord(event)}
           target="_blank"
           rel="noopener noreferrer"
           href="https://www.luohanacademy.com"

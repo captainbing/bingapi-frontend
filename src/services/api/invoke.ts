@@ -31,6 +31,21 @@ export async function addMenu(body: API.InvokeRecord, options?: { [key: string]:
   });
 }
 
+/** 此处后端没有提供注释 GET /invoke/record/copy */
+export async function copyInvokeRecordById(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.copyInvokeRecordByIdParams,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseBoolean>(SYS_URL + '/invoke/record/copy', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
 /** 此处后端没有提供注释 POST /invoke/menu/edit */
 export async function editMenu(body: API.InvokeRecord, options?: { [key: string]: any }) {
   return request<API.BaseResponseBoolean>(SYS_URL + '/invoke/menu/edit', {
@@ -101,6 +116,21 @@ export async function getInvokeRecordById(
     params: {
       ...params,
     },
+    ...(options || {}),
+  });
+}
+
+/** 此处后端没有提供注释 POST /invoke/record/recover */
+export async function recoverInvokeRecordById(
+  body: API.InvokeRecordRequest,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseBoolean>(SYS_URL + '/invoke/record/recover', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
     ...(options || {}),
   });
 }

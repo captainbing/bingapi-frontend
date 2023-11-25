@@ -1,7 +1,7 @@
 import { useModel } from '@umijs/max';
 import { Button, Form, Input, message, Tabs } from 'antd';
 import { useEffect, useState } from 'react';
-import {editUserInfo, getUserById, updateUserPassword} from "@/services/api/user";
+import {editUserInfo, getUserById, resetEncryptKey, updateUserPassword} from "@/services/api/user";
 
 type LayoutType = Parameters<typeof Form>[0]['layout'];
 
@@ -64,6 +64,24 @@ const UserSetting = () => {
     console.log('Failed:', errorInfo);
   };
 
+  /**
+   * 重置密钥
+   */
+  const resetEncryptKeyOnce = async () => {
+    console.log("resetEncryptKey=>",basicInfoForm.getFieldsValue(true))
+    const res = await resetEncryptKey()
+    if (res?.code === 200){
+      setInitialState({
+        ...initialState,
+        currentUser:res?.data
+      })
+      basicInfoForm.setFieldValue("accessKey",res?.data.accessKey)
+      basicInfoForm.setFieldValue("secretKey",res?.data.secretKey)
+      return
+    }
+    message.error(res?.message)
+  }
+
   return (
     <>
       <Tabs
@@ -76,7 +94,7 @@ const UserSetting = () => {
               <Form
                 labelCol={{ span: 4 }}
                 wrapperCol={{ span: 14 }}
-                layout={'vertical'}
+                layout={'horizontal'}
                 form={basicInfoForm}
                 initialValues={{ layout: formLayout }}
                 onValuesChange={onFormLayoutChange}
@@ -91,7 +109,7 @@ const UserSetting = () => {
                 <Form.Item label="简介" name={'userProfile'}>
                   <Input.TextArea placeholder="简介" allowClear />
                 </Form.Item>
-                <Form.Item>
+                <Form.Item wrapperCol={{ offset: 1, span: 16 }}>
                   <Button type={'dashed'} onClick={onSubmitUserInfo}>
                     提交
                   </Button>
@@ -107,8 +125,8 @@ const UserSetting = () => {
                 <Form
                   name="passwordInfoForm"
                   initialValues={{ oldPassword: '', newPassword: '', checkNewPassword: '' }}
-                  labelCol={{ span: 8 }}
-                  wrapperCol={{ span: 16 }}
+                  labelCol={{ span: 4 }}
+                  wrapperCol={{ span: 14 }}
                   style={{ maxWidth: 600 }}
                   form={passwordInfoForm}
                   onFinish={onFinish}
@@ -138,13 +156,39 @@ const UserSetting = () => {
                     <Input.Password />
                   </Form.Item>
 
-                  <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                  <Form.Item wrapperCol={{ offset: 1, span: 16 }}>
                     <Button type="primary" htmlType="submit">
                       修改
                     </Button>
                   </Form.Item>
                 </Form>
               </>
+            ),
+          },{
+            label: `密钥设置`,
+            key: 'secret',
+            children: (
+              <Form
+                labelCol={{ span: 4 }}
+                wrapperCol={{ span: 14 }}
+                layout={'horizontal'}
+                form={basicInfoForm}
+                initialValues={{ layout: formLayout }}
+                onValuesChange={onFormLayoutChange}
+                style={{ maxWidth: 600 }}
+              >
+                <Form.Item label="accessKey" name={'accessKey'}>
+                  <Input.Password placeholder="accessKey" allowClear />
+                </Form.Item>
+                <Form.Item label="secretKey" name={'secretKey'}>
+                  <Input.Password placeholder="secretKey" allowClear />
+                </Form.Item>
+                <Form.Item wrapperCol={{ offset: 1, span: 16 }}>
+                  <Button type={'dashed'} onClick={resetEncryptKeyOnce}>
+                    重置
+                  </Button>
+                </Form.Item>
+              </Form>
             ),
           },
         ]}

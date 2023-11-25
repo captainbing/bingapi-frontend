@@ -8,7 +8,7 @@ const MenuModal = (props: any) => {
   //用useImperativeHandle暴露一些外部ref能访问的属性
   useImperativeHandle(props.onRef, () => {
     return {
-      editSetting: editSetting,
+      editSetting,
     };
   });
 
@@ -40,9 +40,10 @@ const MenuModal = (props: any) => {
       message.error(res?.message);
     }
   };
-
   const editSetting = () => {
     console.log('treeMenu', treeMenu);
+
+    if (!treeMenu)return
     const parentKey = recursionGetParent(treeMenu, currentFloor?.parentId);
     const title = recursionGetTitle(treeMenu, currentFloor?.key);
     form.setFieldValue('title', title);
@@ -58,7 +59,7 @@ const MenuModal = (props: any) => {
    * @param treeMenu
    * @param parentId
    */
-  const recursionGetParent = (treeMenu, parentId): any => {
+  const recursionGetParent = (treeMenu:any, parentId:any): any => {
     for (let i = 0; i < treeMenu.length; i++) {
       if (treeMenu[i]?.key === parentId) {
         return treeMenu[i]?.key;
@@ -76,7 +77,7 @@ const MenuModal = (props: any) => {
    * @param treeMenu
    * @param key
    */
-  const recursionGetTitle = (treeMenu, key): any => {
+  const recursionGetTitle = (treeMenu:any, key:any): any => {
     for (let i = 0; i < treeMenu.length; i++) {
       if (treeMenu[i]?.key === key) {
         return treeMenu[i]?.title;

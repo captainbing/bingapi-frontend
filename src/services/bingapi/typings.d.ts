@@ -37,9 +37,9 @@ declare namespace API {
     message?: string;
   };
 
-  type BaseResponseInvokeRequest = {
+  type BaseResponseInvokeVO = {
     code?: number;
-    data?: InvokeRequest;
+    data?: InvokeVO;
     message?: string;
   };
 
@@ -132,6 +132,14 @@ declare namespace API {
     captcha: string;
   };
 
+  type convertChinese2PinyinParams = {
+    chinese?: string;
+  };
+
+  type copyInvokeRecordByIdParams = {
+    id?: string;
+  };
+
   type deleteConfigByIdParams = {
     config: SysConfig;
   };
@@ -149,7 +157,7 @@ declare namespace API {
   };
 
   type deleteMenuParams = {
-    id: string;
+    id?: string;
   };
 
   type DeleteRequest = {
@@ -284,7 +292,8 @@ declare namespace API {
     id?: string;
     parentId?: string;
     userId?: string;
-    url?: string;
+    requestUrl?: string;
+    requestMethod?: string;
     type?: string;
     requestParam?: string;
     requestHeader?: string;
@@ -300,9 +309,10 @@ declare namespace API {
   };
 
   type InvokeRecordRequest = {
+    id?: string;
     title?: string;
     parentId?: string;
-    url?: string;
+    requestUrl?: string;
     requestMethod?: string;
     requestParam?: RequestField[];
     requestHeader?: RequestField[];
@@ -313,34 +323,35 @@ declare namespace API {
 
   type InvokeRecordVO = {
     id?: string;
+    title?: string;
     parentId?: string;
     userId?: string;
-    url?: string;
+    requestUrl?: string;
+    requestMethod?: string;
     type?: string;
-    requestParam?: string;
-    requestHeader?: string;
+    requestParam?: RequestField[];
+    requestHeader?: RequestField[];
     requestBody?: string;
-    responseHeader?: string;
+    responseHeader?: RequestField[];
     responseBody?: string;
     createBy?: string;
     createTime?: string;
     updateBy?: string;
     updateTime?: string;
     remark?: string;
-    title?: string;
-    requestParams?: RequestField[];
-    requestHeaders?: RequestField[];
   };
 
   type InvokeRequest = {
-    url?: string;
-    method?: string;
-    requestParams?: Record<string, any>;
-    requestHeaders?: Record<string, any>;
-    responseHeaders?: Record<string, any>;
+    requestUrl?: string;
+    requestMethod?: string;
+    requestParam?: RequestField[];
+    requestHeader?: RequestField[];
     requestBody?: string;
+  };
+
+  type InvokeVO = {
+    responseHeader?: Record<string, any>;
     responseBody?: string;
-    baseResponse?: string;
   };
 
   type IPageDictData = {
@@ -449,7 +460,8 @@ declare namespace API {
 
   type RequestField = {
     key?: string;
-    value?: string;
+    requestKey?: string;
+    requestValue?: string;
     description?: string;
   };
 
@@ -509,10 +521,17 @@ declare namespace API {
     remark?: string;
   };
 
+  type testParams = {
+    userName?: string;
+    age?: string;
+  };
+
   type User = {
     id?: string;
     userAccount?: string;
     userPassword?: string;
+    accessKey?: string;
+    secretKey?: string;
     unionId?: string;
     mpOpenId?: string;
     userName?: string;
@@ -537,6 +556,8 @@ declare namespace API {
   type UserVO = {
     id?: string;
     userAccount?: string;
+    accessKey?: string;
+    secretKey?: string;
     unionId?: string;
     mpOpenId?: string;
     userName?: string;

@@ -17,13 +17,13 @@ const RequestHeader = (props:any) => {
       editable: true,
     },
     {
-      title: 'value',
+      title: 'Value',
       dataIndex: 'requestValue',
       width: '30%',
       editable: true,
     },
     {
-      title: 'description',
+      title: 'Description',
       dataIndex: 'description',
       editable: true,
     },
@@ -33,15 +33,15 @@ const RequestHeader = (props:any) => {
       // @ts-ignore
       render: (_, record: { key: React.Key }) =>
         requestHeader.length >= 1 ? (
-          <Popconfirm title="Sure to delete?" onConfirm={() => handleDelete(record?.key)}>
-            <a>Delete</a>
+          <Popconfirm title="删除当前行" onConfirm={() => handleDelete(record?.key)}>
+            <Button danger type={"dashed"}>删除</Button>
           </Popconfirm>
         ) : null,
     },
   ];
 
   const handleSave = (row: DataType) => {
-    const newData = [...dataSource];
+    const newData = [...requestHeader];
     const index = newData.findIndex((item) => row.key === item.key);
     const item = newData[index];
     newData.splice(index, 1, {
@@ -153,7 +153,7 @@ const RequestHeader = (props:any) => {
             },
           ]}
         >
-          <Input ref={inputRef} onPressEnter={save} onBlur={save} />
+          <Input ref={inputRef} placeholder={dataIndex} onPressEnter={save} onBlur={save} />
         </Form.Item>
       ) : (
         <div className="editable-cell-value-wrap" style={{ paddingRight: 24 }} onClick={toggleEdit}>
@@ -234,9 +234,9 @@ const RequestHeader = (props:any) => {
   const handleAdd = () => {
     const newData: DataType = {
       key: nanoid(),
-      requestKey: `Edward King`,
-      requestValue: '32',
-      description: `London, Park Lane no.`,
+      requestKey: '',
+      requestValue: '',
+      description: '',
     };
     acceptRequestHeader([...requestHeader,newData])
   };

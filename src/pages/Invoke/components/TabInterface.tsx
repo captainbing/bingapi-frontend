@@ -4,12 +4,13 @@ import {UserOutlined} from "@ant-design/icons";
 
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
-const defaultPanes = new Array(2).fill(null).map((_, index) => {
+const defaultPanes = new Array(1).fill(null).map((_, index) => {
   const id = String(index + 100);
-  return { label: `Tab ${id}`, children: '', key: id };
+  return { label: `New Request`, children: '', key: id };
 });
 
-const TabInterface = forwardRef(({}, ref: any) => {
+const TabInterface = forwardRef(({fetchInvokeRecordById}:any, ref: any) => {
+
   const test = (key: string, title: string, isLeaf: boolean) => {
     if (!isLeaf) {
       // 类型为目录
@@ -49,6 +50,7 @@ const TabInterface = forwardRef(({}, ref: any) => {
     if (newPanes.length && targetKey === activeKey) {
       const { key } = newPanes[targetIndex === newPanes.length ? targetIndex - 1 : targetIndex];
       setActiveKey(key);
+      fetchInvokeRecordById(key)
     }
     setItems(newPanes);
   };

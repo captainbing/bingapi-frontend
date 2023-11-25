@@ -13,13 +13,13 @@ const RequestParam = ({ acceptRequestParams, requestParam, handleDeleteRequestPa
       editable: true,
     },
     {
-      title: 'value',
+      title: 'Value',
       dataIndex: 'requestValue',
       width: '30%',
       editable: true,
     },
     {
-      title: 'description',
+      title: 'Description',
       dataIndex: 'description',
       editable: true,
     },
@@ -145,12 +145,12 @@ const RequestParam = ({ acceptRequestParams, requestParam, handleDeleteRequestPa
           name={dataIndex}
           rules={[
             {
-              required: true,
+              required: false,
               message: `${title} is required.`,
             },
           ]}
         >
-          <Input ref={inputRef} onPressEnter={save} onBlur={save} />
+          <Input ref={inputRef} placeholder={dataIndex} onPressEnter={save} onBlur={save} />
         </Form.Item>
       ) : (
         <div className="editable-cell-value-wrap" style={{ paddingRight: 24 }} onClick={toggleEdit}>
@@ -182,20 +182,6 @@ const RequestParam = ({ acceptRequestParams, requestParam, handleDeleteRequestPa
   };
 
   const [selectedParamRowKeys, setSelectedParamRowKeys] = useState<React.Key[]>([]);
-  const [dataSource, setDataSource] = useState<DataType[]>([
-    {
-      key: '0',
-      requestKey: 'key1',
-      requestValue: 'value1',
-      description: 'London, Park Lane no. 0',
-    },
-    {
-      key: '1',
-      requestKey: 'key2',
-      requestValue: 'value2',
-      description: 'London, Park Lane no. 1',
-    },
-  ]);
   const onSelectChange = (newSelectedRowKeys: React.Key[], selectedRows: any) => {
     let requestParam = {};
     for (let index in selectedRows) {
@@ -224,9 +210,9 @@ const RequestParam = ({ acceptRequestParams, requestParam, handleDeleteRequestPa
   const handleAdd = () => {
     const newData: DataType = {
       key: nanoid(),
-      requestKey: `Edward King`,
-      requestValue: '32',
-      description: `London, Park Lane no.`,
+      requestKey: '',
+      requestValue: '',
+      description: '',
     };
     acceptRequestParams([...requestParam, newData]);
   };

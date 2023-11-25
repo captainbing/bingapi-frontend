@@ -58,3 +58,10 @@ export async function updateUserPassword(data:object,options?: { [key: string]: 
   });
 }
 
+/** 此处后端没有提供注释 GET /user/reset */
+export async function resetEncryptKey(options?: { [key: string]: any }) {
+  return request<API.BaseResponseUserVO>(SYS_URL + '/user/reset', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}

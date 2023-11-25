@@ -32,7 +32,7 @@ import {
   deleteMenu,
   getInvokeRecordById,
   getMenuTree,
-  invokeInterface,
+  invokeInterface, recoverInvokeRecord, recoverInvokeRecordById,
   selectMenu
 } from '@/services/api/invoke';
 import { DirectoryTreeProps } from 'antd/es/tree';
@@ -48,22 +48,30 @@ const { DirectoryTree } = Tree;
 const Index: React.FC = () => {
 
   const { initialState } = useModel('@@initialState');
-  const [menuTreeData,setMenuTreeData] = useState<any>([])
+  const [recordTreeData,setRecordTreeData] = useState<any>([])
   const params = useParams();
   const searchParams = useSearchParams();
   const location: any = useLocation();
   const [treeMenu,setTreeMenu] = useState([])
-  const listMenuTree = () => {
-    selectMenu({
+  /**
+   * 原始请求数据
+   */
+  const listMenuTree = async () => {
+    const directoryMenuData = await selectMenu({
       id:initialState?.currentUser?.id
-    }).then(result=>{
-      setTreeMenu(result?.data)
-      getMenuTree().then(res=>{
-        console.log("res===>",res?.data)
-        recursionGetTree(res?.data,result?.data)
-        setMenuTreeData(res?.data)
-      })
     })
+    if (directoryMenuData?.code === 200){
+      setTreeMenu(directoryMenuData?.data)
+      const res = await getMenuTree()
+      if (res?.code === 200){
+        setRecordTreeData(res?.data)
+        recursionGetTree(res?.data,directoryMenuData?.data)
+        return
+      }
+      message.error(res?.message)
+    }else{
+      message.error(directoryMenuData?.message)
+    }
   }
 
   /**
@@ -81,9 +89,9 @@ const Index: React.FC = () => {
           isLeaf:currentMenu?.isLeaf
         }
         if (currentMenu.isLeaf){ // 文件
-          currentMenu.title = <SelfDropDown currentFloor={temp} treeMenu={treeMenuData} listMenuTree={listMenuTree} isMenu={false}/>;
+          currentMenu.title = <SelfDropDown currentFloor={temp} treeMenu={treeMenuData}  listMenuTree={listMenuTree} isMenu={false}/>;
         }else{
-          currentMenu.title = <SelfDropDown currentFloor={temp} treeMenu={treeMenuData} listMenuTree={listMenuTree} isMenu={true}/>;
+          currentMenu.title = <SelfDropDown currentFloor={temp} treeMenu={treeMenuData}  listMenuTree={listMenuTree} isMenu={true}/>;
         }
         if (menu[i].children){
           recursionGetTree(menu[i].children,treeMenuData)
@@ -103,9 +111,6 @@ const Index: React.FC = () => {
     }
 
     listMenuTree()
-    console.log('params=', params);
-    console.log('searchParams', searchParams);
-    console.log('location', location);
   }, []);
 
   /*** 当前需要调试的接口*/
@@ -113,7 +118,7 @@ const Index: React.FC = () => {
   /**
    * 请求相关信息
    */
-  const [invokeRecord,setInvokeRecord] = useState({
+  const defaultInvokeRecord = {
     requestUrl:"",
     requestMethod:"GET",
     requestParam:[],
@@ -126,7 +131,8 @@ const Index: React.FC = () => {
       description:""
     }],
     responseBody:"{}"
-  })
+  }
+  const [invokeRecord,setInvokeRecord] = useState({...defaultInvokeRecord})
 
 
   /*** 控制抽屉 */
@@ -153,10 +159,10 @@ const Index: React.FC = () => {
       return;
     }
     const res = await invokeInterface({
-      url: invokeRecord?.url,
-      method: invokeRecord.requestMethod,
-      requestParams:invokeRecord.requestParam,
-      requestHeaders:invokeRecord.requestHeader,
+      requestUrl: invokeRecord?.requestUrl,
+      requestMethod: invokeRecord.requestMethod,
+      requestParam:invokeRecord.requestParam,
+      requestHeader:invokeRecord.requestHeader,
       requestBody: invokeRecord.requestBody,
     });
     if (res?.code === 200) {
@@ -189,20 +195,37 @@ const Index: React.FC = () => {
       // 类型为目录
       return;
     }
+    setCurrentRecordId(info.node.key as string)
     // @ts-ignore
     tabRef.current && tabRef.current.test(info.node.key, info.node.title, info.node.isLeaf);
-    // todo 获取当前接口 调用信息
-    getInvokeRecordById({
-      id:info.node.key as string
-    }).then(res=>{
-      setInvokeRecord(res?.data)
-    })
+    fetchInvokeRecordById(info.node.key as string)
     console.log('Trigger Select', keys, info);
   };
+
+  /**
+   * 获取当前接口 调用信息
+   * @param id
+   */
+  const fetchInvokeRecordById = async (id:string) => {
+    const res = await getInvokeRecordById({
+      id
+    })
+    if (res?.code === 200){
+      setInvokeRecord(res?.data)
+      return
+    }
+    if (res?.code === 40400){
+      setInvokeRecord({...defaultInvokeRecord})
+      return
+    }
+    message.error(res?.message)
+  }
 
   const onExpand: DirectoryTreeProps['onExpand'] = (keys, info) => {
     console.log('Trigger Expand', keys, info);
   };
+
+
 
   /**
    * 请求选项 todo做成配置式
@@ -337,6 +360,28 @@ const Index: React.FC = () => {
       requestHeader: newData
     });
   }
+
+  /**
+   * 覆盖当前调用记录
+   */
+  const [currentRecordId,setCurrentRecordId] = useState<string>("")
+  const recoverInvokeRecord = async () => {
+    if (currentRecordId === ""){
+      message.warning("还未选择")
+      return
+    }
+    const res = await recoverInvokeRecordById({
+      ...invokeRecord,
+      id:currentRecordId
+    })
+    if (res?.code === 200){
+      message.success("更新成功")
+      return
+    }
+    message.error(res?.message)
+  }
+
+
   return (
     <PageContainer
       header={{
@@ -367,14 +412,14 @@ const Index: React.FC = () => {
             defaultExpandAll
             onSelect={onSelect}
             onExpand={onExpand}
-            treeData={menuTreeData}
+            treeData={recordTreeData}
           />
         </Col>
 
         <Col span={18} offset={1}>
           <Row gutter={0}>
             <Col className="gutter-row" span={24}>
-              <TabInterface ref={tabRef} />
+              <TabInterface ref={tabRef} fetchInvokeRecordById={fetchInvokeRecordById}/>
               <Space.Compact block={true}>
                 <Select
                   size="large"
@@ -404,6 +449,9 @@ const Index: React.FC = () => {
                 </Button>
                 <Button type="primary" size="large" onClick={()=>setSaveModalOpen(true)}>
                   保存
+                </Button>
+                <Button type="primary" size="large" onClick={recoverInvokeRecord}>
+                  覆盖
                 </Button>
               </Space.Compact>
             </Col>
@@ -471,6 +519,7 @@ const Index: React.FC = () => {
         drawerOpen={drawerOpen}
         onCloseDrawer={onCloseDrawer}
       />
+
       {/*保存接口*/}
       <>
         <Modal
