@@ -91,22 +91,26 @@ const requestParamsDataSource = [
     description: '输出壁纸格式[json|images]默认为images',
   },
 ];
-const DrawerInterface = ({currentInterface,onCloseDrawer,drawerOpen}:any) => {
+const DrawerInterface = (props:any) => {
+
+  const {currentInterface,onCloseDrawer,drawerOpen} = props
+
   return (
     <Drawer width={640} placement="right" closable={false} onClose={onCloseDrawer} open={drawerOpen}>
+      <p> 接口名称:{currentInterface?.name}</p>
       <p> 请求方式:{currentInterface?.method}</p>
       <p> 请求地址:{currentInterface?.url}</p>
       <p> 返回格式:"json/images"</p>
       <p> 请求示例:{currentInterface?.url}</p>
       <p> 请求参数:</p>
       <Table
-        dataSource={requestParamsDataSource}
+        dataSource={currentInterface?.requestParam}
         columns={requestParamsColumns}
         pagination={false}
       />
       <p> 返回参数:</p>
       <Table
-        dataSource={responseParamsDataSource}
+        dataSource={currentInterface?.responseParam}
         columns={responseParamsColumns}
         pagination={false}
       />

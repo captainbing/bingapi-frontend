@@ -30,11 +30,17 @@ export async function editInterface(data:object,options?: { [key: string]: any }
 }
 
 
-/** 中台搜索 图片 */
-export async function getInterfaceById(params:object,options?: { [key: string]: any }) {
-  return request<CUSTOM_API.CustomResponse>(SYS_URL + '/interface/getInterface', {
+/** 此处后端没有提供注释 GET /interface/get */
+export async function getInterfaceInfoById(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.getInterfaceInfoByIdParams,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseInterfaceInfo>(SYS_URL + '/interface/get', {
     method: 'GET',
-    params,
+    params: {
+      ...params,
+    },
     ...(options || {}),
   });
 }
@@ -63,6 +69,14 @@ export async function listCurrentUserInterfaceInfo(params:object,options?: { [ke
   }>(SYS_URL + '/interface/listInterfaces', {
     method: 'GET',
     params,
+    ...(options || {}),
+  });
+}
+
+/** 此处后端没有提供注释 GET /interface/analysis */
+export async function listTopInterfaceInfo(options?: { [key: string]: any }) {
+  return request<API.BaseResponseListInterfaceInfoAnalysisVO>(SYS_URL + '/interface/analysis', {
+    method: 'GET',
     ...(options || {}),
   });
 }

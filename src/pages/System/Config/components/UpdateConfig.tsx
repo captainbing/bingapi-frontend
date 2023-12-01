@@ -7,7 +7,7 @@ import JSONPretty from 'react-json-pretty';
 /**
  * 编辑接口
  */
-const UpdateConfig = ({ id, editModalVisible, handleEditCancel, editFlag }: any) => {
+const UpdateConfig = ({ id, editModalVisible, handleEditCancel, isEdit }: any) => {
   const [form] = Form.useForm();
   const [componentSize, setComponentSize] = useState<SizeType | 'default'>('default');
 
@@ -35,7 +35,7 @@ const UpdateConfig = ({ id, editModalVisible, handleEditCancel, editFlag }: any)
     //     'updateTime',
     //     dayjs(form.getFieldValue('updateTime')).format('YYYY-MM-DD HH:mm:ss'),
     //   );
-    if (editFlag) {
+    if (isEdit) {
       // 编辑
       const res = await updateConfig(form.getFieldsValue(true));
       if (res?.code === 200) {
@@ -59,7 +59,7 @@ const UpdateConfig = ({ id, editModalVisible, handleEditCancel, editFlag }: any)
 
   return (
     <Modal
-      title={editFlag ? '编辑' : '新建'}
+      title={isEdit ? '编辑' : '新建'}
       width={1000}
       open={editModalVisible}
       onOk={handleEditOk}

@@ -1,7 +1,7 @@
-import { editInterface,getInterfaceById } from '@/services/api/interface';
+import { editInterface, getInterfaceInfoById } from '@/services/api/interface';
 import { SizeType } from '@ant-design/pro-form/es/BaseForm';
-import { Col,Form,Input,message,Modal,Row,Select } from 'antd';
-import { useEffect,useState } from 'react';
+import { Col, Form, Input, message, Modal, Row, Select } from 'antd';
+import { useEffect, useState } from 'react';
 import JSONPretty from 'react-json-pretty';
 
 /**
@@ -15,7 +15,7 @@ const UpdateInterface = ({ id, editModalVisible, handleEditCancel }: any) => {
     setComponentSize(size);
   };
   useEffect(() => {
-    getInterfaceById({
+    getInterfaceInfoById({
       id,
     }).then((res) => {
       form.setFieldsValue(res?.data);
@@ -132,5 +132,5 @@ const UpdateInterface = ({ id, editModalVisible, handleEditCancel }: any) => {
       <JSONPretty json={form.getFieldsValue(true)}></JSONPretty>
     </Modal>
   );
-}
+};
 export default UpdateInterface

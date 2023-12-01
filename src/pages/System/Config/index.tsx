@@ -2,7 +2,7 @@ import SearchConfig from '@/pages/System/Config/components/SearchConfig';
 import UpdateConfig from '@/pages/System/Config/components/UpdateConfig';
 import { deleteDictTypeById } from '@/services/api/dicttype';
 import { deleteInterfaceBatch, editInterface } from '@/services/api/interface';
-import { listConfig } from '@/services/api/sysconfig';
+import {deleteConfigById, listConfig} from '@/services/api/sysconfig';
 import { PageContainer } from '@ant-design/pro-components';
 import { Button, Divider, message, Popconfirm, Space, Switch, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -116,7 +116,7 @@ const Config: React.FC = () => {
    * 根据ID删除接口（逻辑）
    */
   const removeDictTypeById = async (record: any) => {
-    const res = await deleteDictTypeById({
+    const res = await deleteConfigById({
       id: record?.id,
     });
     if (res?.code === 200) {
@@ -210,6 +210,7 @@ const Config: React.FC = () => {
     setEditModalVisible(true);
   };
   const handleEditCancel = () => {
+    setEditFlag(false)
     setId('');
     setEditModalVisible(false);
     getConfigList({}).then();

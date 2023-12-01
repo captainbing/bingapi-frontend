@@ -25,9 +25,9 @@ declare namespace API {
     message?: string;
   };
 
-  type BaseResponseInterfaceInfo = {
+  type BaseResponseInterfaceInfoDrawer = {
     code?: number;
-    data?: InterfaceInfo;
+    data?: InterfaceInfoDrawer;
     message?: string;
   };
 
@@ -76,6 +76,12 @@ declare namespace API {
   type BaseResponseIPageUserVO = {
     code?: number;
     data?: IPageUserVO;
+    message?: string;
+  };
+
+  type BaseResponseListInterfaceInfoAnalysisVO = {
+    code?: number;
+    data?: InterfaceInfoAnalysisVO[];
     message?: string;
   };
 
@@ -208,15 +214,7 @@ declare namespace API {
     dictData: DictData;
   };
 
-  type getInterfaceByIdParams = {
-    id: number;
-  };
-
   type getInterfaceInfoByIdParams = {
-    id: number;
-  };
-
-  type getInterfaceInfoParams = {
     id: number;
   };
 
@@ -232,6 +230,10 @@ declare namespace API {
     userAccount: string;
   };
 
+  type getQQImage1Params = {
+    qqRequest: QQRequest;
+  };
+
   type getQQImageParams = {
     qqRequest: QQRequest;
   };
@@ -245,8 +247,47 @@ declare namespace API {
     name?: string;
     description?: string;
     url?: string;
+    requestParam?: string;
     requestHeader?: string;
     responseHeader?: string;
+    responseParam?: string;
+    status?: number;
+    method?: string;
+    userId?: number;
+    createTime?: string;
+    updateTime?: string;
+    invokeTotal?: number;
+    deleted?: number;
+  };
+
+  type InterfaceInfoAnalysisVO = {
+    id?: number;
+    name?: string;
+    description?: string;
+    url?: string;
+    requestParam?: string;
+    requestHeader?: string;
+    responseHeader?: string;
+    responseParam?: string;
+    status?: number;
+    method?: string;
+    userId?: number;
+    createTime?: string;
+    updateTime?: string;
+    invokeTotal?: number;
+    deleted?: number;
+    totalNum?: number;
+  };
+
+  type InterfaceInfoDrawer = {
+    id?: number;
+    name?: string;
+    description?: string;
+    url?: string;
+    requestParam?: RequestParam[];
+    requestHeader?: string;
+    responseHeader?: string;
+    responseParam?: ResponseParam[];
     status?: number;
     method?: string;
     userId?: number;
@@ -261,8 +302,10 @@ declare namespace API {
     name?: string;
     description?: string;
     url?: string;
+    requestParam?: string;
     requestHeader?: string;
     responseHeader?: string;
+    responseParam?: string;
     status?: number;
     method?: string;
     userId?: number;
@@ -465,6 +508,21 @@ declare namespace API {
     description?: string;
   };
 
+  type RequestParam = {
+    key?: number;
+    name?: string;
+    require?: boolean;
+    type?: string;
+    description?: string;
+  };
+
+  type ResponseParam = {
+    key?: number;
+    name?: string;
+    type?: string;
+    description?: string;
+  };
+
   type SearchInterfaceRequest = {
     name?: string;
     status?: string;
@@ -491,6 +549,10 @@ declare namespace API {
 
   type sendCaptchaParams = {
     userAccount: string;
+  };
+
+  type sendMailParams = {
+    message: string;
   };
 
   type SysConfig = {
