@@ -13,6 +13,18 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponseChart = {
+    code?: number;
+    data?: Chart;
+    message?: string;
+  };
+
+  type BaseResponseChartVO = {
+    code?: number;
+    data?: ChartVO;
+    message?: string;
+  };
+
   type BaseResponseDictData = {
     code?: number;
     data?: DictData;
@@ -40,6 +52,12 @@ declare namespace API {
   type BaseResponseInvokeVO = {
     code?: number;
     data?: InvokeVO;
+    message?: string;
+  };
+
+  type BaseResponseIPageChart = {
+    code?: number;
+    data?: IPageChart;
     message?: string;
   };
 
@@ -138,12 +156,37 @@ declare namespace API {
     captcha: string;
   };
 
+  type Chart = {
+    id?: number;
+    name?: string;
+    goal?: string;
+    chartData?: string;
+    chartType?: string;
+    genChart?: string;
+    genResult?: string;
+    userId?: string;
+    createTime?: string;
+    updateTime?: string;
+    deleted?: number;
+  };
+
+  type ChartVO = {
+    name?: string;
+    chartType?: string;
+    genChart?: string;
+    genResult?: string;
+  };
+
   type convertChinese2PinyinParams = {
     chinese?: string;
   };
 
   type copyInvokeRecordByIdParams = {
     id?: string;
+  };
+
+  type deleteChartByIdParams = {
+    chart: Chart;
   };
 
   type deleteConfigByIdParams = {
@@ -204,6 +247,20 @@ declare namespace API {
 
   type doSearchVideoParams = {
     pictureQueryRequest: PictureQueryRequest;
+  };
+
+  type genChartByAiParams = {
+    genChartByAiRequest: GenChartByAiRequest;
+  };
+
+  type GenChartByAiRequest = {
+    name?: string;
+    goal?: string;
+    chartType?: number;
+  };
+
+  type getChartByIdParams = {
+    chart: Chart;
   };
 
   type getConfigByIdParams = {
@@ -397,52 +454,66 @@ declare namespace API {
     responseBody?: string;
   };
 
+  type IPageChart = {
+    size?: number;
+    total?: number;
+    records?: Chart[];
+    pages?: number;
+    current?: number;
+  };
+
   type IPageDictData = {
     size?: number;
     total?: number;
-    current?: number;
     records?: DictData[];
     pages?: number;
+    current?: number;
   };
 
   type IPageDictType = {
     size?: number;
     total?: number;
-    current?: number;
     records?: DictType[];
     pages?: number;
+    current?: number;
   };
 
   type IPageInterfaceInfo = {
     size?: number;
     total?: number;
-    current?: number;
     records?: InterfaceInfo[];
     pages?: number;
+    current?: number;
   };
 
   type IPageSysConfig = {
     size?: number;
     total?: number;
-    current?: number;
     records?: SysConfig[];
     pages?: number;
+    current?: number;
   };
 
   type IPageSysJob = {
     size?: number;
     total?: number;
-    current?: number;
     records?: SysJob[];
     pages?: number;
+    current?: number;
   };
 
   type IPageUserVO = {
     size?: number;
     total?: number;
-    current?: number;
     records?: UserVO[];
     pages?: number;
+    current?: number;
+  };
+
+  type listChartByPageParams = {
+    chart: Chart;
+    current?: number;
+    size?: number;
   };
 
   type listConfigParams = {

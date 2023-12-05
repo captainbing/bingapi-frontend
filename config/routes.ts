@@ -19,7 +19,7 @@ export default [
   { path: '/welcome', name: '主页', icon: 'smile', component: './Welcome' },
   { path: '/invoke', name: '接口调用', layout: 'top', icon: 'crown', component: './Invoke' },
   { path: '/search', name: '中台搜索', icon: 'crown', exact: false, component: './Search' },
-  { path: '/analysis', name: 'Excel分析', icon: 'crown', exact: false, component: './Analysis' },
+  { path: '/analysis', name: 'Excel分析', icon: 'crown', exact: false, component: './ExcelAnalysis' },
   {
     path: '/admin',
     name: '业务管理',
@@ -28,7 +28,7 @@ export default [
     routes: [
       { path: '/admin/interface', name: '接口管理', icon: 'smile', component: './Admin/Interface' },
       { path: '/admin/user', name: '用户管理', icon: 'smile', component: './Admin/User' },
-      { path: '/admin/analysis', name: '接口分析', icon: 'smile', component: './Admin/Analysis' },
+      { path: '/admin/analysis', name: '接口分析', icon: 'smile', component: './Admin/InterfaceAnalysis' },
     ],
   },
   {
