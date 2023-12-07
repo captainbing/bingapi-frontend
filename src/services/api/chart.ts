@@ -69,10 +69,10 @@ export async function getChartById(
 /** 此处后端没有提供注释 GET /chart/list */
 export async function listChartByPage(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.listChartByPageParams,
+  params?: API.listChartByPageParams,
   options?: { [key: string]: any },
 ) {
-  return request<API.BaseResponseIPageChart>('/chart/list', {
+  return request<API.BaseResponseIPageChart>(SYS_URL + '/chart/list', {
     method: 'GET',
     params: {
       // current has a default value: 1
@@ -80,8 +80,6 @@ export async function listChartByPage(
       // size has a default value: 10
       size: '10',
       ...params,
-      chart: undefined,
-      ...params['chart'],
     },
     ...(options || {}),
   });

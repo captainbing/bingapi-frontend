@@ -16,7 +16,7 @@ const Settings: ProLayoutProps & {
   fixedHeader: false,
   fixSiderbar: true,
   colorWeak: false,
-  title: 'Postwoman',
+  title: '晴天API开放平台',
   pwa: true,
   // logo: 'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
   logo: 'https://cdn.jsdelivr.net/gh/captainbing/blogimage@main/img/Anchor.svg',

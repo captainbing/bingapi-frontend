@@ -1,12 +1,11 @@
-import { genChartByAi } from "@/services/api/chart";
+import { genChartByAi } from '@/services/api/chart';
 import { UploadOutlined } from '@ant-design/icons';
-import { Button,Card,Col,Divider,Form,message,Row,Select,Space,Upload } from 'antd';
-import Input from "antd/es/input/Input";
-import TextArea from "antd/es/input/TextArea";
-import EChartsReact from "echarts-for-react";
-import React,{ useState } from 'react';
+import { Button, Card, Col, Divider, Form, message, Row, Select, Space, Upload } from 'antd';
+import Input from 'antd/es/input/Input';
+import TextArea from 'antd/es/input/TextArea';
+import EChartsReact from 'echarts-for-react';
+import React, { useState } from 'react';
 
-const { Option } = Select;
 
 const formItemLayout = {
   labelCol: { span: 6 },
@@ -25,39 +24,38 @@ const normFile = (e: any) => {
  * @constructor
  */
 const ExcelAnalysis: React.FC = () => {
-
-  const [biResponse,setBiResponse] = useState({
-    genChart:null,
-    genResult:""
-  })
-  const [submitting,setSubmitting] = useState(false)
+  const [biResponse, setBiResponse] = useState({
+    genChart: null,
+    genResult: '',
+  });
+  const [submitting, setSubmitting] = useState(false);
 
   const onFinish = async (values: any) => {
-    if (submitting){
+    if (submitting) {
       return;
     }
     const formData = new FormData();
-    formData.append("name",values?.name)
-    formData.append("chartType",values?.chartType)
-    formData.append("goal",values?.goal)
-    formData.append("file",values?.file[0]?.originFileObj)
-    setSubmitting(true)
-    const res = await genChartByAi(formData)
-    setSubmitting(false)
+    formData.append('name', values?.name);
+    formData.append('chartType', values?.chartType);
+    formData.append('goal', values?.goal);
+    formData.append('file', values?.file[0]?.originFileObj);
+    setSubmitting(true);
+    const res = await genChartByAi(formData);
+    setSubmitting(false);
     try {
       if (res?.code === 200) {
-        let {genChart, genResult} = res?.data;
-        genChart = JSON.parse(genChart)
-        if (!genChart) throw new Error("生成图表失败")
+        let { genChart, genResult }:any = res?.data;
+        genChart = JSON.parse(genChart);
+        if (!genChart) throw new Error('生成图表失败');
         setBiResponse({
           genChart,
-          genResult
-        })
-        return
+          genResult,
+        });
+        return;
       }
-      message.error(res?.message)
-    } catch (e:any) {
-      message.error(e?.message)
+      message.error(res?.message);
+    } catch (e: any) {
+      message.error(e?.message);
     }
   };
 
@@ -65,16 +63,20 @@ const ExcelAnalysis: React.FC = () => {
     <>
       <Row gutter={24}>
         <Col span={12}>
-          <Card title='智能分析'>
-            <Form name="validate_other" {...formItemLayout} onFinish={onFinish} style={{ maxWidth: 600 }}>
-
+          <Card title="智能分析">
+            <Form
+              name="validate_other"
+              {...formItemLayout}
+              onFinish={onFinish}
+              style={{ maxWidth: 600 }}
+            >
               <Form.Item
                 name="name"
                 label="图表名称"
                 hasFeedback
                 rules={[{ required: true, message: '请输入你的图标名称!' }]}
               >
-                <Input placeholder='请输入图表名称'/>
+                <Input placeholder="请输入图表名称" />
               </Form.Item>
 
               <Form.Item
@@ -83,15 +85,17 @@ const ExcelAnalysis: React.FC = () => {
                 hasFeedback
                 rules={[{ required: true, message: '请输入你的图表类型!' }]}
               >
-                <Select placeholder="请选择图表类型" options={[
-                  {value:0,label:"雷达图"},
-                  {value:1,label:"饼图"},
-                  {value:2,label:"柱状图"},
-                  {value:3,label:"折线图"},
-                  {value:4,label:"散点图"},
-                  {value:5,label:"K线图"},
-                ]}>
-                </Select>
+                <Select
+                  placeholder="请选择图表类型"
+                  options={[
+                    { value: 0, label: '雷达图' },
+                    { value: 1, label: '饼图' },
+                    { value: 2, label: '柱状图' },
+                    { value: 3, label: '折线图' },
+                    { value: 4, label: '散点图' },
+                    { value: 5, label: 'K线图' },
+                  ]}
+                ></Select>
               </Form.Item>
 
               <Form.Item
@@ -100,7 +104,7 @@ const ExcelAnalysis: React.FC = () => {
                 hasFeedback
                 rules={[{ required: true, message: '请输入你的分析需求!' }]}
               >
-                <TextArea placeholder='请输入你的需求'/>
+                <TextArea placeholder="请输入你的需求" />
               </Form.Item>
 
               <Form.Item
@@ -139,19 +143,19 @@ const ExcelAnalysis: React.FC = () => {
           </Card>
         </Col>
         <Col span={12}>
-          <Card title='图表分析' loading={submitting}>
-            {biResponse?.genChart ?
-              <EChartsReact option={biResponse?.genChart}/>
-              : "请在左侧进行提交"
-            }
+          <Card title="图表分析" loading={submitting}>
+            {biResponse?.genChart ? (
+              <EChartsReact option={biResponse?.genChart} />
+            ) : (
+              '请在左侧进行提交'
+            )}
           </Card>
-          <Divider/>
-          <Card title='分析结果' loading={submitting}>
-            {biResponse?.genResult ? biResponse?.genResult : "请在左侧进行提交"}
+          <Divider />
+          <Card title="分析结果" loading={submitting}>
+            {biResponse?.genResult ? biResponse?.genResult : '请在左侧进行提交'}
           </Card>
         </Col>
       </Row>
-
     </>
   );
 };
