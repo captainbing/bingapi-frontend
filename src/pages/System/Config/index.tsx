@@ -1,6 +1,5 @@
 import SearchConfig from '@/pages/System/Config/components/SearchConfig';
 import UpdateConfig from '@/pages/System/Config/components/UpdateConfig';
-import { deleteDictTypeById } from '@/services/api/dicttype';
 import { deleteInterfaceBatch, editInterface } from '@/services/api/interface';
 import {deleteConfigById, listConfig} from '@/services/api/sysconfig';
 import { PageContainer } from '@ant-design/pro-components';
@@ -35,7 +34,7 @@ const Config: React.FC = () => {
       width: '8%',
       render: (status: string, record) => (
         <Switch
-          checked={status === 'Y'}
+          checked={status === 1}
           checkedChildren="是"
           unCheckedChildren="否"
           onClick={(checked, event) => changeInterfaceStatus(checked, record)}
@@ -110,7 +109,7 @@ const Config: React.FC = () => {
 
   useEffect(() => {
     // 初始化接口数据
-    getConfigList({}).then();
+    getConfigList({configType:2}).then();
   }, []);
   /**
    * 根据ID删除接口（逻辑）
@@ -134,6 +133,15 @@ const Config: React.FC = () => {
     setEditModalVisible(true);
     setId('');
   };
+
+  const onResetSearchConfig = async () => {
+    await getConfigList({configType:2})
+  }
+
+  const onSearchConfig = async (searchParam:any) => {
+    await getConfigList(searchParam)
+  }
+
   /**
    * 批量删除接口
    */
@@ -242,7 +250,10 @@ const Config: React.FC = () => {
     >
       <SearchConfig
         // @ts-ignore
-        onAddConfig={handleAddConfig} />
+        onAddConfig={handleAddConfig}
+        onResetSearchConfig={onResetSearchConfig}
+        onSearchConfig={onSearchConfig}
+      />
       <Divider />
       <Table
         // title={()=><Button type={"dashed"}>管理员</Button>}

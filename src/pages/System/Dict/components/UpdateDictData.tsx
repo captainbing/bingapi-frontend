@@ -1,7 +1,6 @@
-import { getConfigById, updateConfig } from '@/services/api/sysconfig';
+
 import { SizeType } from '@ant-design/pro-form/es/BaseForm';
 import { Col, DatePicker, Form, Input, message, Modal, Row, Select } from 'antd';
-import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import JSONPretty from 'react-json-pretty';
 import {getDictDataById, updateDictData} from "@/services/api/dictdata";
@@ -37,7 +36,7 @@ const UpdateDictData = ({ id, editDictDataModalVisible, handleEditDictDataCancel
 
   return (
     <Modal
-      title="编辑"
+      title="字典数据"
       width={1000}
       open={editDictDataModalVisible}
       onOk={handleEditOk}
@@ -84,18 +83,18 @@ const UpdateDictData = ({ id, editDictDataModalVisible, handleEditDictDataCancel
           </Col>
         </Row>
 
-        <Row gutter={24}>
-          <Col span={12}>
-            <Form.Item label="创建者" name="createBy">
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="更新人" name="updateBy">
-              <Input />
-            </Form.Item>
-          </Col>
-        </Row>
+        {/*<Row gutter={24}>*/}
+        {/*  <Col span={12}>*/}
+        {/*    <Form.Item label="创建者" name="createBy">*/}
+        {/*      <Input />*/}
+        {/*    </Form.Item>*/}
+        {/*  </Col>*/}
+        {/*  <Col span={12}>*/}
+        {/*    <Form.Item label="更新人" name="updateBy">*/}
+        {/*      <Input />*/}
+        {/*    </Form.Item>*/}
+        {/*  </Col>*/}
+        {/*</Row>*/}
 
         <Row gutter={24}>
           <Col span={12}>
@@ -113,7 +112,6 @@ const UpdateDictData = ({ id, editDictDataModalVisible, handleEditDictDataCancel
           </Col>
         </Row>
       </Form>
-      <JSONPretty json={form.getFieldsValue(true)}></JSONPretty>
     </Modal>
   );
 };

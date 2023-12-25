@@ -14,6 +14,7 @@ const SearchDictType: React.FC = ({onSearchDictType,onResetDictType,addCancel}:a
   };
 
   const resetDictType = () => {
+    form.resetFields()
     onResetDictType();
   };
 

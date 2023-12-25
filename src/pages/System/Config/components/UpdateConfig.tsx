@@ -70,7 +70,7 @@ const UpdateConfig = ({ id, editModalVisible, handleEditCancel, isEdit }: any) =
         labelCol={{ span: 4 }}
         wrapperCol={{ span: 14 }}
         layout="horizontal"
-        initialValues={{ size: componentSize }}
+        initialValues={{ size: componentSize,configType:0 }}
         onValuesChange={onFormLayoutChange}
         size={componentSize as SizeType}
         style={{ maxWidth: 1000 }}
@@ -89,25 +89,25 @@ const UpdateConfig = ({ id, editModalVisible, handleEditCancel, isEdit }: any) =
           </Col>
         </Row>
 
-        <Row gutter={24}>
-          <Col span={12}>
-            <Form.Item label="创建者" name="createBy">
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="更新人" name="updateBy">
-              <Input />
-            </Form.Item>
-          </Col>
-        </Row>
+        {/*<Row gutter={24}>*/}
+        {/*  <Col span={12}>*/}
+        {/*    <Form.Item label="创建者" name="createBy">*/}
+        {/*      <Input />*/}
+        {/*    </Form.Item>*/}
+        {/*  </Col>*/}
+        {/*  <Col span={12}>*/}
+        {/*    <Form.Item label="更新人" name="updateBy">*/}
+        {/*      <Input />*/}
+        {/*    </Form.Item>*/}
+        {/*  </Col>*/}
+        {/*</Row>*/}
 
         <Row gutter={24}>
           <Col span={12}>
             <Form.Item label="是否内置" name="configType">
               <Select>
-                <Select.Option value={'Y'}>是</Select.Option>
-                <Select.Option value={'N'}>否</Select.Option>
+                <Select.Option value={1}>是</Select.Option>
+                <Select.Option value={0}>否</Select.Option>
               </Select>
             </Form.Item>
           </Col>
@@ -118,7 +118,6 @@ const UpdateConfig = ({ id, editModalVisible, handleEditCancel, isEdit }: any) =
           </Col>
         </Row>
       </Form>
-      <JSONPretty json={form.getFieldsValue(true)}></JSONPretty>
     </Modal>
   );
 };

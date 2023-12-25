@@ -34,12 +34,6 @@ const DictDataList = ({ dictType, editModalVisible, handleEditCancel, editFlag }
       ellipsis: true,
     },
     {
-      title: '是否默认',
-      dataIndex: 'defaultFlag',
-      key: 'defaultFlag',
-      ellipsis: true,
-    },
-    {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
@@ -171,8 +165,8 @@ const DictDataList = ({ dictType, editModalVisible, handleEditCancel, editFlag }
 
   return (
     <Modal
-      title="编辑"
-      width={1000}
+      title="编辑字典数据"
+      width={1200}
       open={editModalVisible}
       onOk={handleEditOk}
       onCancel={handleEditCancel}

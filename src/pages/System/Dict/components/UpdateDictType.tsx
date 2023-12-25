@@ -55,19 +55,19 @@ const UpdateDictType = ({addModalVisible, handleAddCancel}: any) => {
           </Col>
         </Row>
 
-        <Row gutter={24}>
-          <Col span={12}>
-            <Form.Item label="创建者" name="createBy">
-              <Input/>
-            </Form.Item>
-          </Col>
+        {/*<Row gutter={24}>*/}
+        {/*  <Col span={12}>*/}
+        {/*    <Form.Item label="创建者" name="createBy">*/}
+        {/*      <Input/>*/}
+        {/*    </Form.Item>*/}
+        {/*  </Col>*/}
 
-          <Col span={12}>
-            <Form.Item label="更新者" name="updateBy">
-              <Input/>
-            </Form.Item>
-          </Col>
-        </Row>
+        {/*  <Col span={12}>*/}
+        {/*    <Form.Item label="更新者" name="updateBy">*/}
+        {/*      <Input/>*/}
+        {/*    </Form.Item>*/}
+        {/*  </Col>*/}
+        {/*</Row>*/}
 
         <Row gutter={24}>
           <Col span={12}>

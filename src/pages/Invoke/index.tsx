@@ -42,13 +42,13 @@ import {
   recoverInvokeRecordById,
   selectMenu,
 } from '@/services/api/invoke';
-import { getInterfaceInfoById } from '@/services/bingapi/interfaceInfoController';
 import { useModel } from '@umijs/max';
 import { DirectoryTreeProps } from 'antd/es/tree';
 import React, { useEffect, useRef, useState } from 'react';
 import JSONPretty from 'react-json-pretty';
 import { useLocation, useParams } from 'react-router';
 import { useSearchParams } from 'react-router-dom';
+import {getInterfaceInfoById} from "@/services/api/interface";
 
 const { DirectoryTree } = Tree;
 

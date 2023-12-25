@@ -204,9 +204,7 @@ const DictType: React.FC = () => {
    * 重置
    */
   const resetDictType = async () => {
-    setInterfaceName('');
-    setInterfaceStatus('');
-    setInterfaceMethod('');
+
     await getDictTypeList({});
   };
   /**
